@@ -1,6 +1,10 @@
 MIT License
 
-Copyright (c) 2024 bbauchwitz55
+Crowdsource Segmentation Experiment Tool
+Copyright (c) 2023 Benjamin Bauchwitz
+
+turkey: an Amazon Mechanical Turk turn-key segment tool.
+Copyright (c) 2018 Yanfeng Liu, Jay Carlson, Eric Psota, Lance C. Pérez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

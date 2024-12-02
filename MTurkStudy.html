@@ -1,0 +1,3248 @@
+<!-- 
+    
+    MIT License
+
+    Crowdsource Segmentation Experiment Tool
+    Copyright (c) 2023 Benjamin Bauchwitz
+
+    turkey: an Amazon Mechanical Turk turn-key segment tool.
+    Copyright (c) 2018 Yanfeng Liu, Jay Carlson, Eric Psota, Lance C. Pérez
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE. -->
+
+<link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous"
+/>
+<link
+  crossorigin="anonymous"
+  href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+  rel="stylesheet"
+/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<style>
+    #parent {
+        width: 1000px;
+        height: auto;
+        overflow: hidden;
+        position: relative;
+        background: #f5f5f5;
+    }
+
+    #child {
+        margin: auto;
+    }
+
+    #myCanvas {
+        position: absolute;
+    }
+
+    #pic {
+        width: 100%;
+        height: auto;
+    }
+
+    #text {
+        width: 1000px;
+    }
+
+    .btn:hover {
+        text-shadow: 0px 0px 1px black;
+    }
+
+    .fixed_width {
+        width: 130px !important;
+    }
+
+    .selected{
+        border:5px solid black;
+    }
+
+    #text {
+        margin-bottom: 20px;
+    }
+
+    #buttons {
+        margin-top: 10px;
+    }
+</style>
+
+<div id="Headline">
+    <label style="margin-top: 10px;">
+        <h1>Label <u><b>ALL</b></u> objects you see from the listed classes. On average, these images contain <u><b>[**X**]</b></u> objects.</h1>
+    </label>
+</div>
+
+<div style="margin-top: 5px; margin-left: 10px;">
+
+    <!-- Master buttons for displaying instructions and consent form, and for controlling the undo, reset, and reposition functions -->
+    <div id="master_controls">
+        <span id="master_buttons" style="display: flex; align-items: center;">
+            <button 
+                id="title" 
+                data-testid="title" 
+                type="button" 
+                class="btn btn-outline-primary btn-lg">
+                    Detailed Instructions
+            </button>
+            <button 
+                id="consent" 
+                type="button" 
+                data-testid="consent" 
+                class="btn btn-outline-primary btn-lg" 
+                style="margin-left: 20px;">
+                    Consent Form
+            </button>
+            <span data-testid="buttons" id="buttons" style="margin-left: 50px;">
+                <input
+                    id="undo_button"
+                    data-testid="undo_button"
+                    name="undo_button"
+                    class="btn btn-secondary"
+                    type="button"
+                    value="Undo"
+                />
+                <input
+                    id="reset_button"
+                    data-testid="reset_button"
+                    name="reset_button"
+                    type="button"
+                    class="btn btn-danger"
+                    value="Reset"
+                />
+                <input
+                    id="reposition_button"
+                    data-testid="reposition_button"
+                    name="reposition_button"
+                    type="button"
+                    class="btn btn-warning"
+                    value="Reposition"
+                />
+            </span>
+        </span>
+        
+        
+        <!-- Content of the consent form, which is displayed when the consent button is clicked -->
+        <div data-testid="consent_form" id="consent_form" name="consent_form">
+            <h1>Research study consent form</h1><br>
+            You are invited to participate in a research study called <strong>“Towards a Computer Vision Annotation Error Framework.”</strong><br>
+            <br>
+            The purpose of this study is to assess different techniques for producing image segmentation annotations. 
+            Image segmentation is a method for identifying objects in an image where all of an object's pixels are labeled. 
+            Image segmentation produces higher resolution labels than are obtained in other object detection tasks, such as bounding boxes. 
+            The goal of this study is to assess different methods of producing image segmentation annotations to determine which methods produce the highest quality data.<br>
+            <br>
+            During the study session, you will provide segmentation annotations on a set of images using the user interface provided to you. 
+            You will be told which objects to mark in each image. You may complete as many or as few images as you'd like. 
+            Most images can be completed in under two minutes. 
+            If you leave the session, you can return later to complete more images.<br>
+            <br>
+            The risks of this study are minimal and are anticipated to be no greater than what you would be exposed to in your everyday life.<br>
+            <br>
+            You will be offered compensation of 6 cents per image, or 2 cents per annotated object, depending on which tasks you complete.
+            Payment will be sent directly through Mechanical Turk.
+            To ensure that participants complete the work being paid for, all annotations will be evaluated for accuracy. 
+            Annotations that vary by more than 10% of correct pixels may be denied compensation. 
+            This evaluation will be completed within 7 days of when you submit your annotations, at which time payment will be released.<br>
+            <br>
+            Prior to completing this task, you must complete the English vocabulary quiz at the bottom of this page.
+            You must receive a score of at least 80% on the vocabulary quiz to be eligible for the study.<br>
+            <br>
+            Participation is voluntary. 
+            You do not have to be in this study, and if you do join, you can stop or leave at any time. 
+            In either case there are no penalties and you will be compensated for all images that you complete up to the point you withdraw from the study.<br>
+            <br>
+            There is no direct benefit to you for participating in this study.<br>
+            <br>
+            The research team is not collecting any personal information from you other than your Mechanical Turk worker ID. 
+            This identifier will not be included in any public disclosure of study data.<br>
+            <br>
+            This study is based upon work supported by the United States Department of Defense. 
+            Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Department of Defense.<br>
+            <br>
+            We will limit access to your Amazon Mechanical Turk worker ID to people who have a need to review this information. We cannot promise complete privacy. 
+            The Duke University Institutional Review Board and other representatives of Duke may see your information. 
+            Complete study records shall be maintained for each human research study and shall be made available for review by the Department of Defense. 
+            De-identified, aggregate data may be published online after the conclusion of the study.<br>
+            <br>
+            All documents containing your Amazon Mechanical Turk worker ID will be kept securely for three years and then destroyed.<br>
+            <br>
+            If you have any questions, concerns, or complaints, or think that the research has hurt you, you can talk to the research team by contacting Ben Bauchwitz at <strong>benjamin.bauchwitz@duke.edu</strong>. 
+            This research has been reviewed and approved by the Duke University Campus Institutional Review Board. 
+            You can reach them at campusIRB@duke.edu if you would prefer to speak with someone not associated with the study or have questions about your rights as a research subject. 
+            If contacting the IRB, please reference protocol ID# <strong>2023-0399</strong>.<br>
+            <br>
+            By clicking <strong>submit</strong> at the bottom of this page, you express your consent to participate in this study.
+        </div>
+    
+        <!-- Content of the instructions, which is displayed when the instruction button is clicked -->
+        <ul data-testid="instruction" id="instruction" name="instruction">
+            <li>
+                Hold <strong>right click</strong> to move the image within the drawing canvas.
+            </li>
+            <li>
+                Use the <strong>scroll wheel</strong> to zoom in and out.
+            </li>
+            <li>
+                Press the <strong>n</strong> key or click <strong>Start new annotation</strong> begin annotating a new object.
+            </li>
+            <li>
+                Annotate by selecting one of the <strong>Annotation tools</strong> or press the <strong>m</strong> key to cycle between tools:
+            </li>
+            <ul>
+                <li>
+                    <strong>Dot mode</strong> to mark the location of the object with a single point using <strong>left click</strong>.
+                </li>
+                <li>
+                    <strong>Link mode</strong> to mark the location of the object with a line. <strong>Left click</strong> at the start and end point of the line.
+                </li>
+                <li>
+                    <strong>Bbox mode</strong> to draw a rectangular bounding around the object. <strong>Left click</strong> at the first point, drag to the second point, and release the mouse.
+                </li>
+                <li>
+                    <strong>Polygon mode</strong> to draw any shape around the object by placing boundary points. <strong>Left click</strong> at each vertex of the shape and press the <strong>c</strong> key to close the shape.
+                </li>
+                <li>
+                    <strong>Outline mode</strong> to draw a continuous line around the object. <strong>Left click</strong> and drag the mouse to form the outline, then release to close the shape.
+                </li>
+                <li>
+                    <strong>Paint mode</strong> to paint the pixels over an object. <strong>Left click</strong> and drag to form each paint stroke.
+                </li>
+            </ul>
+            <li>Use the annotation options to adjust annotation appearance:</li>
+            <ul>
+                <li>
+                    Press the <strong>e</strong> key or select <strong>eraser</strong> to turn any annotation tool into an eraser and remove pixels from an annotation.
+                </li>
+                <li>
+                    Adjust the <strong>transparency</strong> of completed annotations (in progress annotations are always solid fill).
+                </li>
+                <li>
+                    Change the paint tool's <strong>brush size</strong> (1 to 100 pixels wide) using the slider. 
+                </li>
+                <li>
+                    Change the paint tool's <strong>brush shape</strong> (circle or square) using the buttons or by hitting the <strong>b</strong> key.
+                </li>
+            </ul>
+            <li>
+                Set the <strong>object class</strong> by selecting an option from the list. Press the <strong>[</strong> or <strong>]</strong> keys to cycle through the list.
+            </li>
+            <li>
+                Press the <strong>f</strong> key or click <strong>Complete annotation</strong> to finish marking an object.
+            </li>    
+            <li>
+                Press the <strong>d</strong> key or click <strong>Delete an annotation</strong> to remove an object by clicking it in the drawing canvas or dobule clicking it's name in the object list. The currently selected object is marked in dark grey.
+            </li>   
+            <li>
+                Press the <strong>s</strong> key or click <strong>Edit an annotation</strong> to modify an existing object by adding or erasing pixels from it's annotation. Press <strong>s</strong> a second time to confirm the object selection.
+            </li>  
+            <li>
+                Press the <strong>[</strong> or <strong>]</strong> keys to cycle through the object list when deleting an object or selecting one to edit.
+            </li> 
+            <li>
+                Press <strong>CTRL+Z</strong> or click the <strong>Undo</strong> button to undo last action.
+            </li>
+            <li>
+                Click the <strong>Reset</strong> button to clear all annotations.
+            </li>
+            <li>
+                Click the <strong>Reposition</strong> button to center the image and reset zoom.
+            </li>
+            <li>Click the <strong>Submit</strong> button to finish current task.</li>
+        </ul>
+    </div>
+
+
+    <div id="main_user_interface">
+
+
+        <span id="controls" style="display: inline-block;">
+
+            <div id="object_controls_panel" style="display: flex; align-items: center; margin-bottom: 10px; margin-top: 10px;">
+
+                <div id="object_controls" style="width: 180px; display: inline-block; align-items: center; margin-right: 10px;">
+                    <input
+                        id="new_annotation_button"
+                        data-testid="new_annotation_button"
+                        name="new_annotation_button"
+                        type="button"
+                        class="btn btn-primary"
+                        style="margin-bottom: 10px; width: 180px;"
+                        value="Start new annotation"
+                    >
+                    <input
+                        id="delete_annotation_button"
+                        data-testid="delete_annotation_button"
+                        type="button"
+                        name="delete_annotation_button"
+                        class="btn btn-danger"
+                        style="margin-bottom: 10px; width: 180px;"
+                        value="Delete an annotation"
+                    />
+                    <input
+                        id="edit_annotation_button"
+                        data-testid="edit_annotation_button"
+                        name="edit_annotation_button"
+                        type="button"
+                        class="btn btn-warning"
+                        style="margin-bottom: 10px; width: 180px;"
+                        value="Edit an annotation"
+                    />
+                    <input
+                        id="complete_annotation_button"
+                        data-testid="complete_annotation_button"
+                        name="complete_annotation_button"
+                        type="button"
+                        class="btn btn-success"
+                        style="margin-bottom: 10px; width: 180px;"
+                        value="Complete annotation"
+                    /> 
+                </div>
+
+                <div id="object_list_viewer" style="display: inline-block; width: 200px; margin-right: 10px; align-items: center;">
+                    <label style="display: block; text-align: center; font-weight: bold;">Annotations:</label>
+                    <select id="object_list" size="10" style="width: 200px;" name="object_list">
+                    </select>
+                    <label id="current_object_indicator">
+                        Current: none
+                    </label>
+                </div>
+
+            </div>
+
+
+            <div id="drawing_tools" style="outline: 1px solid black; display: inline-block; align-items: center;">
+                <label style="display: block; text-align: center; font-weight: bold;">Annotation tools</label>
+
+                <div id="mode_buttons" style="margin-left: 10px;">
+                    <label
+                        id="dot_mode_button"
+                        data-testid="dot_mode_button"
+                        name="dot_mode_button"
+                        type="radio"
+                        class="btn btn-info"
+                        style="width: 80px;"
+                        value="Dot"
+                        hidden
+                        >
+                            Dot
+                    </label>
+                    <label
+                        id="link_mode_button"
+                        data-testid="link_mode_button"
+                        name="link_mode_button"
+                        type="radio"
+                        class="btn btn-outline-secondary"
+                        style="width: 80px;"
+                        value="Link"
+                        hidden
+                        >
+                            Link
+                    </label>
+                    <label
+                        id="bbox_mode_button"
+                        data-testid="bbox_mode_button"
+                        name="bbox_mode_button"
+                        type="radio"
+                        class="btn btn-outline-secondary"
+                        style="width: 80px;"
+                        value="Bbox"
+                        hidden
+                        checked
+                        >
+                            Bbox
+                    </label>
+                    <label
+                        id="polygon_mode_button"
+                        data-testid="polygon_mode_button"
+                        type="radio"
+                        class="btn btn-outline-secondary"
+                        style="width: 80px;"
+                        value="Polygon"
+                        hidden
+                        >
+                            Polygon
+                    </label>
+                    <label
+                        id="outline_mode_button"
+                        data-testid="outline_mode_button"
+                        name="outline_mode_button"
+                        type="radio"
+                        class="btn btn-outline-secondary"
+                        style="width: 80px;"
+                        value="Outline"
+                        hidden
+                        >
+                            Outline
+                    </label>
+                    <label
+                        id="paint_mode_button"
+                        data-testid="paint_mode_button"
+                        name="paint_mode_button"
+                        type="radio"
+                        class="btn btn-outline-secondary"
+                        style="width: 80px;"
+                        value="Paint"
+                        hidden
+                        >
+                            Paint
+                    </label>
+                </div>
+    
+                <span id="annotation_options" style="margin-left: 10px;">
+    
+                    <div id="tool_options" style="display: inline-block; margin-bottom: 10px;">
+    
+                        <input
+                            id="eraser_button"
+                            data-testid="eraser_button"
+                            name="eraser_button"
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            style="width: 150px; margin-top: 20px; margin-left: 50px"
+                            value="Eraser: off"
+                        />
+    
+                        <span style="display: block; width: 250px;">
+                            <label for="transparency">Transparency</label>
+                            <input
+    
+                                id="transparency_slider"
+                                data-testid="transparency_slider"
+                                name="transparency_slider"
+                                type="range"
+                                class="range-field my-4 w-25"
+                                style="width: 100px !important"
+                                min="30"
+                                max="70"                        
+                            />
+                        </span>
+    
+                        <span style="display: block; width: 250px;">
+                            <label for="brushsize">Brush size</label>
+                            <input
+                                id="brushsize_slider"
+                                data-testid="brushsize_slider"
+                                name="brushsize_slider"
+                                type="range"
+                                class="range-field my-4 w-25"
+                                style="width: 100px !important"
+                                min="1"
+                                max="100"
+                                value="30"
+                            />
+                            <input
+                                id="brushsize_text"
+                                data-testid="brushsize_text"
+                                name="brushsize_text"
+                                type="number"
+                                class="text-field"
+                                min="1"
+                                max="100"
+                                value="30"
+                            />
+                        </span>
+    
+                        <span 
+                            id="brush_flip"
+                            data-testid="brush_flip"
+                            name="brush_flip"
+                            data-toggle="buttons"
+                            class="btn-group btn-group-toggle"
+                            style="display: block; width: 250px;"
+                        >
+                            <label>Brush type</label>
+                            <label
+                                id="squarebrush_button"
+                                data-testid="squarebrush_button"
+                                name="options"
+                                type="radio"
+                                class="btn btn-outline-secondary"
+                                autocomplete="off"
+                                checked
+                                disabled>
+                                    Square
+                            </label>
+                            <label
+                                id="circlebrush_button"
+                                data-testid="circlebrush_button"
+                                name="options"
+                                type="radio"
+                                class="btn btn-primary"
+                                autocomplete="off"
+                                disabled>
+                                    Circle
+                            </label>
+                        </span>
+                    </div>
+    
+                    <div id="class_options" style="display: inline-block">
+                        <label style="display: block; text-align: center; font-weight: bold;">Object class:</label>
+                        <select id="label_class" data-testid="label_class" name="label_class" size="8" style="width: 125px;">
+                            <!-- Class options are populated from the task input data and are defaulted to empty -->
+                        </select>
+                    </div>
+                </span>
+            </div>
+
+        </span>
+
+
+        <span id="visualization" style="display: inline-block;">
+            <div id="parent" style="display: inline-block;">
+                <div id="child">
+                    <canvas data-testid="canvas" id="myCanvas"></canvas>
+                    <img data-testid="pic" id="pic" src="https://i.imgur.com/T9cqo2v.jpg"/>
+                </div>
+            </div>
+        </span>
+
+    </div>
+
+
+    <div id="hidden_elements" style="margin-top: 10px;">
+        <div>
+            <label 
+                id="debug_console" 
+                style="outline: 1px solid black; width: 1000px;"
+                hidden
+                >
+                    Console output: N/A
+            </label>
+        </div>
+        <div>
+            <input 
+                id="result_data" 
+                name="result_data" 
+                type="hidden" 
+            />
+        </div>
+        <div>
+            <input 
+                id="annotation_in_progress" 
+                name="annotation_in_progress" 
+                type="hidden" 
+            />
+        </div>
+        <div>
+            <input
+                id="interaction_log"
+                name="interaction_log"
+                type="hidden"
+            />
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<!-- Main JS script for app behavior -->
+<script id="test" type="text/javascript">
+    
+    // For storing completed annotations
+    var annotations = [];
+    setAnnotationListMethods()
+
+    // Default values for the object class selector
+    var classes = {};
+
+    // Initialize the paint state
+    var paint_state = {
+        working_anchor : null,
+        working_vector : null,
+        last_point : null,
+        has_moved : false,
+        has_rotated : false
+    };
+
+    // Basic mouse click properties
+    let timeDownUp = null;                  // exact time of last mouse click event
+    let rightClick = false;                 // right or left click for last mouse click
+
+    // Mouse position relative to different reference points
+    let anchorX, anchorY;                   // mouse position with respect to viewable portion of the browser window
+    let mouseX, mouseY;                     // mouse position relative to the page, correcting for page and element scroll
+    let correctX, correctY;                 // current mouse position in image pixel coordinates
+
+    // Mouse drag data and resulting image translation transform
+    let dragX, dragY;                       // vector of mouse movement during mouse drag
+    let dragged, dragStart;                 // whether mouse drag occured or is in progress
+    let dragOffsetX = 0;                    // amount of movement of image's left edge due to dragging
+    let dragOffsetY = 0;                    // amount of movement of image's top edge due to dragging
+    let translateTransform_raw = [0, 0];    // translation transformation for the X and Y axes
+    let translateTransform = [0, 0];        // translation transformation, adjusted by current scale factor
+
+    // Scroll wheel data and resulting image scaling transform
+    let delta, scaleRatio, scaleDiff;       // degree of mouse wheel roll, ratio of the new scale to the old, and dif between new scale and old
+    let scalingOffsetX = 0;                 // amount of image left edge movement due to scrolling
+    let scalingOffsetY = 0;                 // amount of image top edge movement due to scrolling
+    let oldScale = 1.0;                     // prior image scale before a new scroll operation
+    let newScale = 1.0;                     // new image scale after scroll operation
+    let scaleTransform = 1;                 // TBD: maybe temporary data structure for storing scale values?
+
+    // Basic annotation state data
+    let annotation_state = "standby";       // overall application state; other options: "select", "annotate", "delete"
+    let modes;                              // drawing modes available for the current task
+    let mode = "";                          // currently selected drawing mode
+    let colors = {};                        // maps class names to colors for displaying their annotations, expressed as HSV tuples
+    let transparency_level = 0.5;           // transparency level for displaying completed objects
+    let eraser_mode = false;                // whether drawing tools are in drawing or eraser mode
+
+    // Annotation options specific to link and dot modes
+    let firstPoint = true;                  // whether the last click was first or second point of a link
+    let dotSize = 4;                        // size (px) to display vertices for dot and link modes
+
+    // Annotation options specific to paint mode
+    let directionSwitchThreshold = 0.1;     // threshold of mouse rotation needed (radians) to redraw a paint trajectory
+    let brushSize = 30;                     // diameter of paint brush (px)
+    let brushType = 'circle'                // type of paintbrush selected; other option: "square"
+
+    // Data for delete and undo operations
+    let previous_delete_idx = -1;           // index of previously selected object in delete mode
+    let delete_idx = -1;                    // index of the currently selected object in delete mode
+    let trashcan = new Array();             // stores history of deleted objects, so that they can be restored if undo is called
+    let lastEditObjectId = -1;              // to make undo work properly so we can go back to the last completed object
+
+    // Data for the current object being drawn, for each drawing mode used
+    let currentLink = { class: [], mode: "link", data: [] };
+    let currentPolygon = { class: [], mode: "polygon", data: [] };
+    let currentBbox = { class: [], mode: "bbox", data: [] };
+    let currentOutline = { class: [], mode: "outline", data: []};
+    let currentPaint = { class: [], mode: "paint", data: []};
+    let currentObject = { class: [], modes: {"dot": false, "link": false, "bbox": false, "polygon": false, "outline": false, "paint": false}, exteriors: [], interiors: [], strokes: []};
+    let currentObjectInsertId = -1;
+
+    // Initialize the debug console
+    let debugConsole = document.getElementById("debug_console");
+    debugConsole.innerHTML = "Initialized debug console.";
+    
+    // Establish references to the drawing surfaces
+    let parent = document.getElementById("parent");
+    let child = document.getElementById("child");
+    let canvas = document.getElementById("myCanvas");
+    let ctx = canvas.getContext("2d");
+    let img = document.getElementById("pic");
+    debugConsole.innerHTML = "Established drawing surface objects.";
+
+    // Establish reference to the interaction logger
+    let interaction_log = document.getElementById("interaction_log");
+
+    // Establish references to the drawing tools
+    let transparency_slider = document.getElementById("transparency_slider");
+    let brushsize_slider = document.getElementById("brushsize_slider");
+    let brushsize_text = document.getElementById("brushsize_text");
+
+    let classSelection = document.getElementById("label_class");          
+
+    
+    // Load the HIT input data
+    loadImage();
+    loadModes();
+    loadClasses();
+    loadAnnotations();
+
+
+
+
+    var start = function() {
+
+        // Initialize the primary drawing tools
+        initializeCanvas();
+        initializeTransparencySlider();
+        initializeBrushSizeControls();
+
+        // Add click listeners to the major UI components
+        $("#reset_button").click(reset);
+        $("#reposition_button").click(reposition);
+        $("#undo_button").click(undo);
+        $("#dot_mode_button").click(() => toggleMode("dot"));
+        $("#link_mode_button").click(() => toggleMode("link"));
+        $("#bbox_mode_button").click(() => toggleMode("bbox"));
+        $("#polygon_mode_button").click(() => toggleMode("polygon"));
+        $("#outline_mode_button").click(() => toggleMode("outline"));
+        $("#paint_mode_button").click(() => toggleMode("paint"));
+        $("#new_annotation_button").click(() => setAnnotationStateAnnotate());
+        $("#delete_annotation_button").click(() => setAnnotationStateDelete());
+        $("#edit_annotation_button").click(() => setAnnotationStateSelect());
+        $("#complete_annotation_button").click(() => completeAnnotation(currentObject, currentObjectInsertId));
+        $("#circlebrush_button").click(() => setBrushState("circle", true));
+        $("#squarebrush_button").click(() => setBrushState("square", true));
+        $("#eraser_button").click(() => toggleEraserMode());
+
+        child.addEventListener("DOMMouseScroll", handleScroll, false);
+        child.addEventListener("mousewheel", handleScroll, false);
+
+
+        // The app begins in standby state
+        setAnnotationStateStandby();
+
+        // When only one annotation mode is available, it is selected by default
+        if (modes.length == 1) {
+            toggleMode(modes[0]);
+        }
+
+        // Initialize the consent form and instructions
+        $("#consent_form").slideUp(0);
+        $("#instruction").slideUp(0);
+        $("#consent").click(() => toggleConsentForm());
+        $("#title").click(() => toggleInstructions());
+
+        // Initialize the interaction log
+        let ts = new Date().getTime();
+        interaction_log.value = "start[" + ts + "]";
+        
+        // Add mouse event listeners to the canvas
+        canvas.addEventListener("pointerdown", canvasPointerDownListener);
+        canvas.addEventListener("mousemove", canvasMouseMoveListener);
+        canvas.addEventListener("pointerup", canvasPointerUpListener);
+
+        // Add click event listeners to the class and object select lists
+        document.getElementById('object_list').addEventListener('click', objectListClickListener);
+        classSelection.addEventListener('click', classSelectionClickListener);
+
+        // Add hotkey listeners
+        window.addEventListener("keydown", hotKeys, true); // in log, the keystroke is logged AFTER the action is taken
+
+    }
+
+
+
+
+    function canvasPointerDownListener(evt) {
+    /** 
+     * Listens for a mouse pointerdown event inside the image drawing area
+     *  - In "annotate" state, pointer down initiates the annotation process
+     *  - Begins tracking mouse location history for paint drawing specifically
+     * @param {event} evt - The pointerdown event
+     **/                
+        //debugConsole.innerHTML = "Heard click";
+
+        // Different behavior for right vs. left mouse click
+        rightClick = evt.which == 3;
+
+        // Log the time and location of the pointer down event
+        getCorrectCoords(evt);
+        timeDownUp = new Date().getTime();
+
+        // Get the mouse coordinates with respect to the browser
+        anchorX = evt.clientX;
+        anchorY = evt.clientY;
+
+        // Log the interaction
+        // Note: this operation put after interpreting the mouse data so that the timing is not disrupted
+        // This operation is put before the rest of the method body to preserve log interity if there is an unhandled exception
+        let clickString = "left_click";
+        if (rightClick) {
+            clickString = "right_click";
+        }
+        interaction_log.value += "-pointer_down[" + clickString + "|" + correctX + "|" + correctY + "|" + timeDownUp +"]";
+
+        // The previous drag event must be finished if a click is recorded
+        // Mouse drag behavior activates until the pointer is released
+        dragged = false;
+        dragStart = true;
+
+        if (annotation_state == "annotate" && !rightClick) {
+
+            // For all annotation modes initialize the new annotation data by logging the mode and object class
+            updateAnnotationClass();
+
+            if (mode == "dot") {
+                currentObject.modes.dot = true;
+
+            } else if (mode == "link") {
+                currentObject.modes.link = true;
+
+            } else if (mode == "bbox") {
+                currentObject.modes.bbox = true;
+
+                // For bounding box mode specifically, also record the rectangle's origin coordinate
+                currentBbox.class = getClass();
+                currentBbox.data = new Array();
+                currentBbox.data.push([correctX, correctY]);
+
+            } else if (mode == "polygon") {
+                currentObject.modes.polygon = true;
+
+            } else if (mode == "outline") {
+                currentObject.modes.outline = true;
+
+            } else if (mode == "paint") {
+                currentObject.modes.paint = true;
+
+                // For paint mode specifially, record a polygon where the brush has first touched down and establish the paint stroke history
+                resetPaintState();
+                coord = {x: correctX, y: correctY};
+                addInitialPaintPoint(coord);
+            }
+
+            // If an annotation was started, update the graphics to reflect that
+            updateGraphics();
+        } 
+    }
+
+
+
+
+    function canvasMouseMoveListener(evt) {
+        // Log the location of the mouse move event and store the previous location for calculating the mouse move vector
+        getCorrectCoords(evt);
+
+        // In "delete" state, moving the mouse changes the color of the object under the cursor
+        if (annotation_state == "delete") {
+            updateDeleteSelection()
+
+        // Outside delete state, dragging the mouse with a right click repositions the image
+        } else if (rightClick) {
+            translateImage(evt);
+
+        // In "annotate" state with bounding box mode active, dragging the mouse with left click renders the in-progress bounding box
+        } else if (annotation_state == "annotate" && mode == "bbox" && dragStart) {
+            dragged = true;
+            updateGraphics();
+
+        // In "annotate" state with outline mode active, dragging the mouse adds points to the outline for each detected mouse position
+        }  else if (annotation_state == "annotate" && mode == "outline" && dragStart) {
+            dragged = true;
+            addPointToShape();
+            updateGraphics();
+
+        // In "annotate" state with paint mode active, draging the mouse adds segments to the paint stroke
+        // Due to memory limitations, the paint stroke is structured as a set of anchor points with rectangular connectors between each
+        } else if (annotation_state == "annotate" && mode == "paint" && dragStart) { 
+            extendPaintWithMouseMovement();
+            updateGraphics();
+
+        // In "annotate" state with link mode active, dragging the mouse extends the in progress link line
+        } else if (annotation_state == "annotate" && mode == "link") {
+            updateGraphics();
+        }
+    }
+
+
+
+
+    function extendPaintWithMouseMovement() {
+    /**
+     * Extends paint according to the path of mouse movement
+     * Called when the mouse is dragged on the canvas while paint mode is active
+     **/
+        
+        // First, check if the paint stroke has moved at all from the prior coordinate
+        coord = {x: correctX, y: correctY};
+        paint_state.has_moved = checkIfCoordsDiffer(paint_state.last_point, coord);
+        let willUpdateAnchor = false;
+
+        // If this is the start of the paint stroke, add an anchor point
+        if (paint_state.working_anchor == null) { 
+            addInitialPaintPoint(coord);
+        } 
+        
+        // If this is not the first coordinate and the user has moved the mouse, evaluate the movement vector
+        else if (paint_state.has_moved) {
+
+            // Get the vector between the existing anchor and the current mouse position
+            let current_vector = vectorSubtract(coord, paint_state.working_anchor);
+
+            // See if there is already a paint vector from that same anchor point
+            if (paint_state.working_vector) {
+
+                // If there is, compare the angle between the new vector and the old vector
+                let angle = angleBetweenVectors(paint_state.working_vector, current_vector);
+
+                // If the angle is greater than the threshold, create a curve in the paint stroke
+                if (Math.abs(angle) > directionSwitchThreshold) {
+                    willUpdateAnchor = true;
+                    paint_state.working_anchor = paint_state.last_point;
+                
+                // If the angle is not greater than the threshold, replace the old vector (and associated paint segment) with the new one
+                } else {
+                    removeRedundantPaintSegmentData();  
+                }
+            
+            // If there is no working vector, that means no paint has been extended from the prior anchor point yet
+            } else {
+                paint_state.working_vector = current_vector;
+            }
+            addNewPaintSegment(coord);
+        }
+
+        // If the angle checking indicated that a curve in the paint stroke was needed, add an anchor point at the curve
+        if (willUpdateAnchor) {
+            updatePaintAnchorVector(coord);
+        }
+        paint_state.last_point = coord;
+    }
+
+
+
+
+    function translateImage(evt) {
+    /**
+     * Moves the image vertically or horizontally based on a right click mouse drag
+     * @param {event} evt - The mouse move event that triggered the function call
+     **/
+        let timeMove = new Date().getTime();
+        if (timeMove > timeDownUp) {
+            if (dragStart) {
+                dragged = true;
+                dragX = evt.clientX - anchorX;
+                dragY = evt.clientY - anchorY;
+                translateTransform_raw = [
+                    translateTransform_raw[0] + dragX,
+                    translateTransform_raw[1] + dragY,
+                ];
+                translateTransform[0] = translateTransform_raw[0] / newScale;
+                translateTransform[1] = translateTransform_raw[1] / newScale;
+                updateTransform();
+                dragOffsetX += dragX;
+                dragOffsetY += dragY;
+                anchorX = evt.clientX;
+                anchorY = evt.clientY;
+            }
+        } else {
+            timeDownUp = null;
+        }
+    }
+
+
+
+
+    function canvasPointerUpListener(evt) {
+    /** 
+     * Listens for a mouse pointerup event inside the image drawing area
+     *  - In "annotate" state, pointer up concludes an annotation event
+     *  - In "delete" state, pointer up confirms deletion of the selected annotation
+     *  - Then, reset the mouse drag and right click state variables
+     * @param {event} evt - The pointerup event
+     */
+
+        // Log the time and location of the pointer up event
+        timeDownUp = new Date().getTime();
+        getCorrectCoords(evt);
+
+        // Log the interaction
+        // Note: this operation put after interpreting the mouse data so that the timing is not disrupted
+        // This operation is put before the rest of the method body to preserve log interity if there is an unhandled exception
+        interaction_log.value += "-pointer_up[" + correctX + "|" + correctY + "|" + timeDownUp + "]";
+
+        // In "annotate" state, pointer up automatically triggers annotations to update, unless it was a right mouse click
+        // Right mouse click still triggers image translation
+        if (annotation_state == "annotate" && !rightClick) {
+            canvasPointerUpAnnotate()
+            
+        // In "delete" state, pointer up confirms the deletion of the clicked object
+        } else if (annotation_state == "delete") {
+            deleteAnnotation();
+        }
+
+        // Reset the click parameters
+        rightClick = false;
+        dragStart = false;
+
+        // Render the changes to the annotations
+        updateGraphics();
+
+        // Save the changes to the annotations
+        storeAnnotationResults();
+    }
+
+
+
+
+    function canvasPointerUpAnnotate() {
+        if (dragged) {
+
+            // In bounding box mode, a click-drag-release movement completes the bounding box
+            if (mode == "bbox") {
+
+                // Add the coordinate to the bounding box data
+                currentBbox.data.push([correctX, correctY]);
+
+                // A click-drag-release event should always result in exactly two points, but this tests for unanticipated data corruption
+                // (e.g., due to browser or latency issues)
+                if (currentBbox.data.length == 2) {
+                    const xmin = currentBbox.data[0][0];
+                    const ymin = currentBbox.data[0][1];
+                    const xmax = currentBbox.data[1][0];
+                    const ymax = currentBbox.data[1][1];
+                    const corners = [
+                    [xmin, ymin],
+                    [xmax, ymin],
+                    [xmax, ymax],
+                    [xmin, ymax],
+                    ];
+
+                    addShapeToCurrentObject(corners);
+                    updateGraphics();
+                }
+                currentBbox.data = new Array();
+
+                // In outline mode, a click-drag-release movement closes the curve
+            } else if (mode == "outline") {
+
+                // The curve must have at least two points, otherwise closing it will result in an illegal 1D shape
+                if (currentOutline.data.length > 2) {
+                    currentOutline.class = getClass();
+
+                    // Add outline to the current object as either a positively or negatively filled shape, depending on whether or not the eraser is engaged
+                    addShapeToCurrentObject(currentOutline.data);
+                    currentOutline.data = new Array();
+                    updateGraphics();
+                }
+
+            // In paint mode, a click-drag-release movement ends the paint stroke
+            } else if (mode == "paint") {
+                // Since the paint stroke is complete, reset the paint_state variables
+                paint_state = {
+                    working_anchor : null,
+                    working_vector : null,
+                    last_point : null,
+                    has_moved : false,
+                    has_rotated : false
+                };
+            }
+
+            // Render the changes to the annotations
+            updateGraphics();
+
+            // Handle the pointerup event if it came from a single click
+            } else {
+
+            // In bounding box mode, ignore single clicks and reset the data
+            // Otherwise, individual clicks leave vertices which become connected and corrupt the bounding boxes
+            if (mode == "bbox") {
+                currentBbox.data = new Array();
+
+            // For all other modes, register the new coordinate when the pointer goes up
+            } else {
+                addPointToShape();
+            }
+        }
+    }
+
+
+
+
+    function objectListClickListener(event) {
+    /**
+     * In delete mode, double clicking an option in the object select list triggers the deletion of the corresponding annotation
+     **/
+
+        // Log the interaction
+        // Note: This operation is put before the rest of the method body to preserve log interity if there is an unhandled exception
+        let ts = new Date().getTime();
+        let object_list_log_string = "white_space";
+        if (event.target.tagName === 'OPTION') {
+            object_list_log_string = event.target.index;
+        }
+        interaction_log.value += "-object_list_click[" + event.target.tagName + "|" + object_list_log_string + "|" + ts + "]";
+
+        if (annotation_state == "delete") {
+            let clickedOption = event.target;
+
+            // Check whether it was a list option that was clicked or just blank space inside the select element
+            if (clickedOption.tagName === 'OPTION') {
+                let selected_index = clickedOption.index;
+
+                // If the clicked list option was the same one that was previously selected (i.e., the option was double clicked), delete it
+                if (selected_index == previous_delete_idx) {
+                    delete_idx = selected_index;
+                    deleteAnnotation();
+                    updateDeleteSelection();
+                
+                // Otherwise, if a new list option is selected, set this as the new delete_idx
+                } else {
+                    delete_idx = selected_index;
+                    let display_ind = delete_idx + 1;
+                    document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+                }
+            
+            // If the click applied to empty space inside the list rather than an option, remove the delete_idx
+            } else {
+                delete_idx = -1;
+                document.getElementById("object_list").selectedIndex = -1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: none";
+            }
+
+            // If there were changes to the selected deleteIdx, update the graphics and pointer
+
+            // Update graphics to reflect new strokes or annotation components added with this click
+            updateGraphics();
+            previous_delete_idx = delete_idx;
+        }
+    }
+
+
+
+    function classSelectionClickListener(event) {
+    /**
+     * Listens for clicks to the class select list
+     * If annotate mode is active, clicking a class will change the current object to that class
+     * @param {event} event the mouse click event inside the class select list
+     **/    
+
+        // Log the interaction
+        // Note: This operation is put before the rest of the method body to preserve log interity if there is an unhandled exception
+        let ts = new Date().getTime();
+        let class_list_log_string = "white_space";
+        if (event.target.tagName === 'OPTION') {
+            class_list_log_string = event.target.index;
+        }
+        interaction_log.value += "-class_list_click[" + event.target.tagName + "|" + class_list_log_string + "|" + ts + "]";
+
+        // Handle the click, which will only be registered in annotation mode
+        if (annotation_state == "annotate") {
+            updateAnnotationClass();   
+            updateGraphics();
+        }
+    }
+
+
+
+
+    canvas.oncontextmenu = function () {
+    /**
+     * Disable right click context menu on canvas
+     **/
+        return false;
+    };
+
+
+
+
+    function setAnnotationListMethods() {
+    /**
+     * Sets the methods that can be called on the annotations list object
+     **/
+
+        // Appends the object to the end of the annotations list
+        annotations.push = function (obj) {
+            Array.prototype.push.call(annotations, obj);
+        };
+
+        // Deletes the specified number of elements from the annotations list, starting at idx
+        annotations.remove = function (idx, numElements) {
+            Array.prototype.splice.call(annotations, idx, numElements);
+        };
+
+        // Replaces the object at the designated idx in the annotations list with the new element
+        annotations.splice = function (idx, element) {
+            Array.prototype.splice.call(annotations, idx, 1, element);
+        }
+    }
+
+
+
+
+    function loadImage() {
+    /**
+     * Loads either a default image or the image URL from the HIT config file,
+     * depending on whether this is running in preview/local or production/sandbox mode.
+     **/        
+
+        // MTurk HIT config variables are specified with the syntax {dollar sign}{var_name}
+        let img_src = "${img_url}";
+        if (img_src == "$" + "{img_url}") {
+            // running in preview or local demo mode
+            img_src = "https://i.imgur.com/T9cqo2v.jpg";
+
+            // Second image option for testing S3 bucket integration
+            //img_src = "https://duke-hal-segmentation.s3.amazonaws.com/images/00054602-3bf57337.jpg";
+        }
+        img.setAttribute("src", img_src);
+        debugConsole.innerHTML = "Loaded image.";
+    }
+
+
+
+
+    function loadModes() {
+    /**
+     * Loads either the full set of modes or the subset of modes specified in the HIT config file,
+     * depending on whether this is running in preview/local or production/sandbox mode.
+     **/
+
+        // MTurk HIT config variables are specified with the syntax {dollar sign}{var_name}
+        let mode_data = "${annotation_mode}";
+        if (mode_data == "$" + "{annotation_mode}") {
+            // running in preview or local demo mode
+            mode_data = "dot-link-bbox-polygon-outline-paint";
+
+            // Second option for testing single mode configuration
+            //mode_data = "paint";
+        }
+
+        // For each drawing mode identified, set the button to be visible
+        modes = mode_data.split("-");           // In the HIT config file, the list of modes is split using '-' as the delimiter between mode names
+        for (var m of modes) {
+            var button_id = m + "_mode_button";
+            document.getElementById(button_id).hidden = false;
+
+            // When the task is configured with a single drawing mode, the button defaults to selected
+            if (modes.length == 1) {
+                document.getElementById(button_id).setAttribute("checked", true);
+                document.getElementById(button_id).style.marginLeft = "250px";
+                document.getElementById(button_id).style.marginRight = "250px";
+            }
+        }
+        debugConsole.innerHTML = "Loaded annotation modes.";
+    }
+
+
+
+
+    function loadClasses() {
+    /**
+     * Loads either the default set of classes or the subset of classes specified in the HIT config file,
+     * depending on whether this is running preview/local mode or production/sandbox mode.
+     **/
+        // Populate class list options and generate unique colors based on string hash
+        let classesData = "${classes}";
+        
+        // Running in preview or local demo mode - use the default class list
+        if (classesData == "$" + "{classes}") {
+            classes = {
+                "Airplane": 0,
+                "Backpack": 1,
+                "Bicycle": 2,
+                "Boat": 3,
+                "Bus": 4,
+                "Car": 5,
+                "Cat": 6,
+                "Dog": 7,
+                "Motorcycle": 8,
+                "Person": 9,
+                "Train": 10,
+                "Truck": 11
+            };
+
+        // Running online - read the class list from the HIT config file
+        } else {
+            classes = {};
+            const classList = classesData.split("-");           // In the HIT config file, the list of classes is split using '-' as the delimiter between class names
+            for (let i = 0; i < classList.length; i++) {
+                let key = classList[i];
+                classes[key] = i;
+            }
+        }
+
+        // For each class in the class list, add it to the class list selector element and assign a unique color for visualizing annotations of that class
+        for (var theClass in classes) {
+            let option = document.createElement("option");
+            let codeName = "class" + classes[theClass];
+            let hue = Math.abs(hashCode(codeName) % 360) / 360;
+            let color = [hue, 1.0, 1.0];
+            option.innerHTML = theClass;
+            classSelection.appendChild(option);
+            colors[theClass] = color;
+        }
+
+        // Set the default class to the first class in the list
+        classSelection.selectedIndex = 0;
+        debugConsole.innerHTML = "Loaded classes.";
+    }
+
+
+
+
+    function hashCode(str) {
+    /**
+     * Hashes each class name to a unique number that is used to derive the color for displaying the annotations for that class
+     **/
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash += Math.pow(str.charCodeAt(i) * 31, str.length - i);
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;
+    }
+    
+
+
+
+    function loadAnnotations() {
+    /**
+     * Loads pre-annotations from the HIT config file
+     **/
+    }
+
+
+
+
+    function initializeCanvas() {
+    /**
+     * Set the canvas size to match the image size
+     **/
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.style.cursor = "crosshair";
+        debugConsole.innerHTML = "Initialized canvas.";
+    }
+
+
+
+
+    function setAnnotationStateStandby() {
+    /**
+     * Sets the app to the standby state, which does not permit annotating but permits the user to choose the next operation (delete, edit, new annotation, or submit)
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-standby_state[" + ts + "]";
+
+        // Handle the action
+        document.getElementById("current_object_indicator").innerHTML = "Current: none";
+        annotation_state = "standby";
+        setDeleteMode(false);
+        if (annotations.length == 0) {
+            setObjectControlButtonState(true, false, false, false);
+        } else {
+            setObjectControlButtonState(true, true, true, false);
+        }
+        $("#object_list").prop("disabled", true);
+        setDrawingToolsEnabled(false);
+    }
+
+
+
+
+    function setAnnotationStateSelect() {
+    /**
+     * Sets the app to the select state, which allows the user to select an annotation to edit
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-select_state[" + ts + "]";
+
+        // Handle the action
+        document.getElementById("current_object_indicator").innerHTML = "Current: none";
+        annotation_state = "select";
+        setObjectControlButtonState(true, false, false, false);
+        $("#new_annotation_button").prop("value", "Select this annotation");
+        $("#object_list").prop("selectedIndex", 0);
+        $("#object_list").prop("disabled", false);
+        setDrawingToolsEnabled(false);
+    }
+
+
+
+
+    function setAnnotationStateAnnotate(id_override = -1) {
+    /**
+     * Sets the app to the annotate state, which allows the user to draw an annotation
+     **/
+
+        // Get the index of the selected object in the object list
+        let ts = new Date().getTime();
+        object_list_selectedIndex = document.getElementById("object_list").selectedIndex;
+        let ind = annotations.length + 1;
+
+        // If id_override is >= 0 then the undo function is being called
+        if (id_override >= 0) {
+
+            // Reopen the last edited object
+            currentObject = annotations[id_override];
+            currentObjectInsertId = id_override;
+            ind = id_override + 1;
+            currentClass = currentObject.class;
+            classSelection.selectedIndex = classes[currentClass];
+
+            // Log the interaction
+            interaction_log.value += "-annotate_state[from_undo|" + id_override +  "|" + ts + "]";              // Note: this uses the 0-indexed internal index, not the 1-indexed display index
+        
+        // If id_override < 0 and object_list_selectedIndex < 0, a new object annotation is being created
+        } else if (object_list_selectedIndex < 0) {
+            currentObject = { class: [], modes: {"dot": false, "link": false, "bbox": false, "polygon": false, "outline": false, "paint": false}, exteriors: [], interiors: [], strokes: []};
+            currentObjectInsertId = -1;
+
+            // Log the interaction
+            interaction_log.value += "-annotate_state[new_annotation" + "|" + ts + "]";
+
+        // If id_override < 0 and object_list_selectedIndex >= 0, an existing object annotation is being edited
+        } else {
+            currentObject = annotations[object_list_selectedIndex];
+            currentObjectInsertId = object_list_selectedIndex;
+            ind = object_list_selectedIndex + 1;
+            currentClass = currentObject.class;
+            classSelection.selectedIndex = classes[currentClass];
+
+            // Log the interaction
+            interaction_log.value += "-annotate_state[from_select|" + object_list_selectedIndex + "|" + ts + "]";              // Note: this uses the 0-indexed internal index, not the 1-indexed display index
+        }
+
+        // Update the user interface to provide access to the drawing tools
+        document.getElementById("current_object_indicator").innerHTML = "Current: Object " + ind;
+        document.getElementById("object_list").selectedIndex = -1;
+        annotation_state = "annotate";                                               // TODO: why is this called so low in this method?
+        setObjectControlButtonState(false, false, false, true);
+        $("#new_annotation_button").prop("value", "Start new annotation");
+        $("#object_list").prop("disabled", true);
+        setDrawingToolsEnabled(true);
+    }
+
+
+
+
+    function setAnnotationStateDelete() {
+    /**
+     * Sets the app to the delete state, which allows the user to delete annotations
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-delete_state[" + ts + "]";
+
+        // Set the selector depending on whether an object is already marked for deletion
+        if (getDeleteIdx() < 0) {
+            document.getElementById("current_object_indicator").innerHTML = "Current: none";
+        } else {
+            display_ind = getDeleteIdx() + 1;
+            document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+        }
+
+        // Update the user interface to reflect the delete state
+        annotation_state = "delete";                                        // TODO: why is this called so low in this method?
+        setDeleteMode(true);
+        setObjectControlButtonState(false, false, false, true);
+        $("#object_list").prop("disabled", false);
+        setDrawingToolsEnabled(false);
+    }
+
+
+
+
+    function setDrawingToolsEnabled(enabled) {
+    /**
+     * Sets the style of the drawing tools panel depending on whether the app is in a state that permits drawing annotations
+     * @param {boolean} enabled - whether drawing tools should be enabled or disabled
+     **/
+
+        // If drawing tools are disabled, set the panel to be grayed out and disable all buttons
+        if (!enabled) {
+            document.getElementById("drawing_tools").style.backgroundColor = "silver";
+            document.getElementById("dot_mode_button").style.pointerEvents = "none";
+            document.getElementById("link_mode_button").style.pointerEvents = "none";
+            document.getElementById("bbox_mode_button").style.pointerEvents = "none";
+            document.getElementById("polygon_mode_button").style.pointerEvents = "none";
+            document.getElementById("outline_mode_button").style.pointerEvents = "none";
+            document.getElementById("paint_mode_button").style.pointerEvents = "none";
+            $("#eraser_button").prop("disabled", true);
+            $("#label_class").prop("disabled", true);
+            document.getElementById("transparency_slider").disabled = true;
+            document.getElementById("brushsize_slider").disabled = true;
+            document.getElementById("brushsize_text").disabled = true;
+        
+            // If drawing tools are enabled, set the panel to be normal visibility and enable all buttons
+        } else {
+            document.getElementById("drawing_tools").style.removeProperty("background-color");
+            document.getElementById("dot_mode_button").style.pointerEvents = "auto";
+            document.getElementById("link_mode_button").style.pointerEvents = "auto";
+            document.getElementById("bbox_mode_button").style.pointerEvents = "auto";
+            document.getElementById("polygon_mode_button").style.pointerEvents = "auto";
+            document.getElementById("outline_mode_button").style.pointerEvents = "auto";
+            document.getElementById("paint_mode_button").style.pointerEvents = "auto";
+            $("#eraser_button").prop("disabled", false);
+            $("#label_class").prop("disabled", false);
+            document.getElementById("transparency_slider").disabled = false;
+            if (mode == "paint") {
+                document.getElementById("brushsize_slider").disabled = false;
+                document.getElementById("brushsize_text").disabled = false;
+            }
+        }
+
+        // If drawing tools are enabled, set the style of the brush buttons depending on whether they were active in the previous drawing session
+        let brushActive = enabled && (mode == "paint");
+        setBrushState(brushType, brushActive);
+    }
+
+
+
+  
+    function setObjectControlButtonState(newButton, deleteButton, editButton, completeButton) {
+    /**
+     * Enables and disables the annotation state buttons
+     * @param {boolean} newButton - whether the new annotation button should be enabled
+     * @param {boolean} deleteButton - whether the delete annotation button should be enabled
+     * @param {boolean} editButton - whether the edit annotation button should be enabled
+     * @param {boolean} completeButton - whether the complete annotation button should be enabled
+     **/
+        
+        // Set the state of the new annotation button
+        if (newButton) {
+            $("#new_annotation_button").prop("disabled", false);
+            $("#new_annotation_button").removeClass("btn-outline-secondary");
+            $("#new_annotation_button").addClass("btn-primary");
+        } else {
+            $("#new_annotation_button").prop("disabled", true);
+            $("#new_annotation_button").removeClass("btn-primary");
+            $("#new_annotation_button").addClass("btn-outline-secondary");
+        }
+
+        // Set the state of the delete annotation button
+        if (deleteButton) {
+            $("#delete_annotation_button").prop("disabled", false);
+            $("#delete_annotation_button").removeClass("btn-outline-secondary");
+            $("#delete_annotation_button").addClass("btn-danger");
+        } else {
+            $("#delete_annotation_button").prop("disabled", true);
+            $("#delete_annotation_button").removeClass("btn-danger");
+            $("#delete_annotation_button").addClass("btn-outline-secondary");
+        }
+
+        // Set the state of the edit annotation button
+        if (editButton) {
+            $("#edit_annotation_button").prop("disabled", false);
+            $("#edit_annotation_button").removeClass("btn-outline-secondary");
+            $("#edit_annotation_button").addClass("btn-warning");
+        } else {
+            $("#edit_annotation_button").prop("disabled", true);
+            $("#edit_annotation_button").removeClass("btn-warning");
+            $("#edit_annotation_button").addClass("btn-outline-secondary");
+        }
+
+        // Set the state of the complete annotation button
+        if (completeButton) {
+            $("#complete_annotation_button").prop("disabled", false);
+            $("#complete_annotation_button").removeClass("btn-outline-secondary");
+            $("#complete_annotation_button").addClass("btn-success");
+        } else {
+            $("#complete_annotation_button").prop("disabled", true);
+            $("#complete_annotation_button").removeClass("btn-success");
+            $("#complete_annotation_button").addClass("btn-outline-secondary");
+        }
+    }
+
+
+
+
+    function setDeleteMode(deleteMode) {
+    /**
+     * Sets the canvas to exhibit either 'delete' or 'annotate' appearance
+     * @param {boolean} deleteMode - True if the canvas should be in delete mode, false if it should be in annotate mode
+     **/
+    
+         // annotate mode
+        if (deleteMode == false) {
+            canvas.style.cursor = "crosshair";
+            $("#complete_annotation_button").prop("value", "Complete annotation");
+            
+            // When delete mode is turned off, update the graphics to return annotations to their class-specific colors
+            updateGraphics();
+        
+        // delete mode
+        } else {
+            delete_idx = getDeleteIdx();
+            canvas.style.cursor = "pointer";
+            $("#complete_annotation_button").prop("value", "Finish deleting");
+
+            // When delete mode is turned on, update the graphics to convert the selected annotation to gray
+            updateGraphics();
+        }
+    }
+
+
+
+
+    function completeAnnotation(ann, idx = -1) {
+    /**
+     * Completes an in-progress annotation, adding the data to the output list and reseting the system state to standby
+     * @param {dict} ann - the annotation to be completed
+     * @param {int} idx - the index of the annotation in the annotation sequence, which dictates where it will be inserted in the object selector
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-complete_annotation[" + idx + "|" + ts + "]";   
+
+        // Handle the action
+        if (annotation_state == "annotate") {
+
+            // Ensure the annotation's class is current with the selected class
+            if (classSelection.selectedIndex >= 0) {
+                updateAnnotationClass();
+                ann.class = getClass();
+            }
+
+            // If idx is -1, this is a new annotation
+            if (idx == -1) {
+
+                // If no id is specified, add the annotation to the end of the list
+                annotations.push(ann);
+                idx = annotations.length;
+
+                // create a new option in the object select list reflecting this new annotation
+                let option = document.createElement("option");
+                let label = "Object " + idx + ": " + ann.class;
+                option.innerHTML = label;
+                document.getElementById("object_list").appendChild(option);
+
+            // If an idx other than -1 is specified, this is an edit to an existing annotation
+            } else {
+
+                // Insert the annotation at the place in the sequence where it belongs, overwriting what was previously there
+                annotations.splice(idx, ann);
+
+                // When idx is greater than the length of the annotation sequence, revert it to be equal to the length
+                if (idx > annotations.length) {
+                    idx = annotations.length;
+                
+                // When idx is less than 0 and greater in absolute value than the length of the sequence, remove the first element of the annotation sequence
+                } else if ((idx * -1) > annotations.length) {
+                    document.getElementById("object_list").remove(0)
+                    idx = 1;
+
+                // When idx is less than 0 but less than the absolute value of the length of the sequence, idx refers to a distance backward from the end of the sequence
+                } else if (idx < 0) {
+                    idx = annotations.length + idx;
+                    document.getElementById("object_list").remove(idx)
+                    idx += 1;
+                
+                // If idx is positive and less than the absolute value of the length of the sequence, idx refers to an index within the sequence
+                } else {
+                    document.getElementById("object_list").remove(idx)
+                    idx += 1;
+                }
+
+                // Create an option in the object select list reflecting this annotation
+                let option = document.createElement("option");
+                let label = "Object " + idx + ": " + ann.class;
+                option.innerHTML = label;
+                document.getElementById("object_list").add(option, idx-1);
+            }
+
+            // Update the reference to the last edited object
+            lastEditObjectId = idx - 1;
+        }
+
+        // Reset the working annotation data structure
+        currentObject = { class: [], modes: {"dot": false, "link": false, "bbox": false, "polygon": false, "outline": false, "paint": false}, exteriors: [], interiors: [], strokes: []};
+        setAnnotationStateStandby();
+        debugConsole.innerHTML = JSON.stringify(annotations);
+    }
+
+
+
+
+    function addPointToShape() {
+        if (mode == "polygon") {
+            currentPolygon.data.push([correctX, correctY]);
+        } else if (mode == "outline") {
+            currentOutline.data.push([correctX, correctY]);
+        }
+    }
+
+
+
+
+    function updateAnnotationClass() {
+        currentObject.class = getClass();
+        switch (mode) {
+        case "dot": // dot mode
+            break;
+        case "link": // link mode
+            break;
+        case "bbox": // bbox mode
+            currentBbox.class = getClass();
+            break;
+        case "polygon": // polygon mode
+            currentPolygon.class = getClass();
+            break;
+        case "outline": // outline mode
+            currentOutline.class = getClass();
+            break;
+        case "paint": // paint mode
+            break;
+        }
+    }
+
+
+
+
+    function storeAnnotationResults() {
+        if (annotations.length == 0) {
+            document.getElementById("result_data").value = "";
+        } else {
+            document.getElementById("result_data").value = JSON.stringify(annotations);
+        }
+        let currentData = [currentBbox, currentPolygon, currentOutline, currentPaint, currentObject];
+        document.getElementById("annotation_in_progress").value = JSON.stringify(currentData);
+    }
+
+
+
+
+    function getClass() {
+    /**
+     * Returns the name of the class currently selected in the class selector drop down in the user interface
+     **/
+        return classSelection[classSelection.selectedIndex].innerHTML;
+    }
+
+
+
+
+    function toggleMode(modeName) {
+    /**
+     * Toggle between the various drawing modes
+     * Disable and enable the paintbrush options depending on whether paint mode is toggled on or off
+     * @param {string} modeName - The name of the drawing mode to toggle
+     **/
+        
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-toggle_mode[" + modeName + "|" + ts + "]";
+
+        // Handle the button press
+        mode = modeName;
+        if (mode == "paint") {
+            $("#brushsize_slider").prop("disabled", false);
+            brushsize_text.disabled = false;
+            setBrushState(brushType, true);
+        } else {
+            $("#brushsize_slider").prop("disabled", true);
+            brushsize_text.disabled = true;
+            setBrushState(brushType, false);
+        }
+        setModeButtonState(mode);
+    }
+
+
+
+
+    function setModeButtonState(mode) {
+    /**
+     * Change the appearance of the mode butons depending on which drawing mode is selected
+     * @param {string} mode - The name of the drawing mode to toggle
+     **/
+
+        // Default all buttons to the unselected state
+        $("#dot_mode_button").removeClass("btn-info");
+        $("#dot_mode_button").addClass("btn-outline-secondary");
+        $("#link_mode_button").removeClass("btn-info");
+        $("#link_mode_button").addClass("btn-outline-secondary");
+        $("#bbox_mode_button").removeClass("btn-info");
+        $("#bbox_mode_button").addClass("btn-outline-secondary");
+        $("#polygon_mode_button").removeClass("btn-info");
+        $("#polygon_mode_button").addClass("btn-outline-secondary");
+        $("#outline_mode_button").removeClass("btn-info");
+        $("#outline_mode_button").addClass("btn-outline-secondary");
+        $("#paint_mode_button").removeClass("btn-info");
+        $("#paint_mode_button").addClass("btn-outline-secondary");
+
+        // Set the button for the designated mode to the selected state
+        if (mode == "dot") {
+            $("#dot_mode_button").removeClass("btn-outline-secondary");
+            $("#dot_mode_button").addClass("btn-info");
+        } else if (mode == "link") {
+            $("#link_mode_button").removeClass("btn-outline-secondary");
+            $("#link_mode_button").addClass("btn-info");
+        } else if (mode == "bbox") {
+            $("#bbox_mode_button").removeClass("btn-outline-secondary");
+            $("#bbox_mode_button").addClass("btn-info");
+        } else if (mode == "polygon") {
+            $("#polygon_mode_button").removeClass("btn-outline-secondary");
+            $("#polygon_mode_button").addClass("btn-info");
+        } else if (mode == "outline") {
+            $("#outline_mode_button").removeClass("btn-outline-secondary");
+            $("#outline_mode_button").addClass("btn-info");
+        } else if (mode == "paint") {
+            $("#paint_mode_button").removeClass("btn-outline-secondary");
+            $("#paint_mode_button").addClass("btn-info");
+        }
+    }
+
+
+
+
+    function initializeTransparencySlider() {
+    /**
+     * Set an event listener that updates the transparency level when the slider is moved
+     **/
+        transparency_slider.oninput = function () {
+            let ts = new Date().getTime();
+            transparency_level = this.value / 100.0;
+
+            // Log the interaction
+            interaction_log.value += "-transparency_slider[" + transparency_level + "|" + ts + "]";
+
+            // Update graphics so that any completed annotations are displayed with the new transparency level
+            updateGraphics();
+        };
+        debugConsole.innerHTML = "Initialized transparency slider.";
+    }
+
+
+
+
+    function initializeBrushSizeControls() {
+    /**
+     * Add event listeners that update the brush size when the text or slider are changed
+     * Ensure the text and slider are synchronized
+     * Add listeners that block illegal values in the text box
+     **/
+
+        // Set an event listener that updates the brush size when the slider is moved
+        brushsize_slider.oninput = function() {
+            let ts = new Date().getTime();
+            brushSize = this.value;
+            brushsize_text.value = brushSize;
+
+            // Log the interaction
+            interaction_log.value += "-brushsize_slider[" + brushSize + "|" + ts + "]";
+        };
+
+        // Set an event listener that updates the brush size when the text box is changed
+        brushsize_text.oninput = function() {
+            let ts = new Date().getTime();
+
+            // Block illegal brush size values in the text box (values > 100 or < 0)
+            if (this.value > 100) {
+                this.value = 100
+            }
+            if (this.value < 0) {
+                this.value = 1
+            }
+
+            // Set the event listener
+            brushSize = this.value;
+            brushsize_slider.value = brushSize;
+
+            // Log the interaction
+            interaction_log.value += "-brushsize_text[" + brushSize + "|" + ts + "]";
+        }
+        debugConsole.innerHTML = "Initialized brushsize controls.";
+
+        // If the user clicks out of the brush size text box while it contains an invalid value, return the brush size to the default value
+        brushsize_text.addEventListener("blur", function() {
+            let ts = new Date().getTime();
+            if (!brushsize_text.checkValidity()) {
+                brushSize = 30;
+                brushsize_slider.value = brushSize;
+                brushsize_text.value = brushSize;
+
+                // Log the interaction
+                interaction_log.value += "-brushsize_text[ADJUSTED|" + brushSize + "|" + ts + "]";
+            }
+            if (brushsize_text.value.length == 0) {
+                brushSize = 30;
+                brushsize_slider.value = brushSize;
+                brushsize_text.value = brushSize;  
+                
+                // Log the interaction
+                interaction_log.value += "-brushsize_text[ADJUSTED|" + brushSize + "|" + ts + "]";
+            }
+        });
+        debugConsole.innerHTML = "Added brushsize_text blur event listener.";
+    }
+
+
+
+
+    function setBrushState(type, active) {
+    /**
+     * Sets the state of the paintbrush tool and associated UI elements
+     * @param {string} type - the type of brush to set (circle or square)
+     * @param {boolean} active - whether the paint tool is active or not
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        let active_string = "active";
+        if (!active) {
+            active_string = "inactive";
+        }
+        interaction_log.value += "-set_brush_state[" + type + "|" + active_string + "|" + ts + "]";
+        
+        let selectedClass = "btn-primary";
+        document.getElementById("circlebrush_button").style.pointerEvents = "auto";
+        document.getElementById("squarebrush_button").style.pointerEvents = "auto";
+        if (!active) {
+            selectedClass = "btn-secondary";
+            document.getElementById("circlebrush_button").style.pointerEvents = "none";
+            document.getElementById("squarebrush_button").style.pointerEvents = "none";
+        }
+        if (type == "circle") {
+            brushType = 'circle';
+            $("#squarebrush_button").removeClass("btn-primary");
+            $("#squarebrush_button").removeClass("btn-secondary");
+            $("#squarebrush_button").addClass("btn-outline-secondary");
+            $("#circlebrush_button").removeClass("btn-outline-secondary");
+            $("#circlebrush_button").removeClass("btn-secondary");
+            $("#circlebrush_button").removeClass("btn-primary");
+            $("#circlebrush_button").addClass(selectedClass);
+        } else if (type == "square") {
+            brushType = 'square';
+            $("#circlebrush_button").removeClass("btn-primary");
+            $("#circlebrush_button").removeClass("btn-secondary");
+            $("#circlebrush_button").addClass("btn-outline-secondary");
+            $("#squarebrush_button").removeClass("btn-outline-secondary");
+            $("#squarebrush_button").removeClass("btn-secondary");
+            $("#squarebrush_button").removeClass("btn-primary");
+            $("#squarebrush_button").addClass(selectedClass);
+        }
+    }
+
+
+
+
+    function toggleEraserMode() {
+    /**
+     * Swithes from annotate mode to eraser mode and vice versa
+     * Updates the UI to reflect the current mode
+     **/
+        eraser_mode = !eraser_mode;
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        let eraser_string = "off";
+        if (eraser_mode) {
+            eraser_string = "on";
+        }
+        interaction_log.value += "-toggle_eraser_mode[" + eraser_string + "|" + ts + "]";
+
+        // Handle the button press
+        if (eraser_mode == false) {
+            // annotate mode
+            canvas.style.cursor = "crosshair";
+            $("#eraser_button").removeClass("btn-primary");
+            $("#eraser_button").addClass("btn-outline-secondary");
+            $("#eraser_button").prop("value", "Eraser: off");
+        } else {
+            // eraser mode
+            //canvas.style.cursor = "pointer";
+            $("#eraser_button").removeClass("btn-outline-secondary");
+            $("#eraser_button").addClass("btn-primary");
+            $("#eraser_button").prop("value", "Eraser: on");
+        }
+    }
+
+
+
+
+    function drawBbox(annotation, options) {
+    /**
+     * Draws a bounding box annotation
+     * @param annotation: the annotation to be rendered
+     * @param options: indicates whether the annotation is being hovered over in delete mode and whether the annotation is currently being drawn
+     **/
+        const [r, g, b] = getColor(annotation, options);
+        ctx.fillStyle = "rgba(1, 1, 1, 0)";
+        if (eraser_mode) {
+            ctx.strokeStyle = "rgba(1, 1, 1, 1)";
+        } else {
+            ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + ", 1.0)";
+        }
+        // Always use the same globalCompositeOperation because only a current box is rendered with this method
+        // Once the box is finalized, it is added to an object and rendered that way as an interior or exterior
+        ctx.globalCompositeOperation = "source-over";
+        const xmin = annotation.data[0][0];
+        const ymin = annotation.data[0][1];
+        let xmax, ymax;
+        if (options.current) {
+            xmax = correctX;
+            ymax = correctY;
+        } else {
+            xmax = annotation.data[1][0];
+            ymax = annotation.data[1][1];
+        }
+        const corners = [
+            [xmin, ymin],
+            [xmax, ymin],
+            [xmax, ymax],
+            [xmin, ymax],
+        ];
+        fillPolygon(corners);
+    }
+
+
+
+
+    function drawPolygonOutline(corners) {
+    /**
+     * Draws the outline of a polygon
+     * @param corners: the corners of the polygon to be drawn
+     **/
+        for (let j = 0; j < corners.length; j++) {
+            ctx.fillRect(
+                corners[j][0] - dotSize / 2,
+                corners[j][1] - dotSize / 2,
+                dotSize,
+                dotSize
+            );
+        }
+        ctx.beginPath();
+        ctx.moveTo(corners[0][0], corners[0][1]);
+        for (let j = 1; j < corners.length; j++) {
+            ctx.lineTo(corners[j][0], corners[j][1]);
+            ctx.stroke();
+        }
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+
+
+
+    function fillPolygon(corners) {
+    /**
+     * Fills the polygon defined by the corners with the current color
+     * @param corners: the corners of the polygon to be filled
+     **/
+        ctx.beginPath();
+        ctx.moveTo(corners[0][0], corners[0][1]);
+        for (let j = 1; j < corners.length; j++) {
+            ctx.lineTo(corners[j][0], corners[j][1]);
+            ctx.stroke();
+        }
+        ctx.lineTo(corners[0][0], corners[0][1]);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fill();
+    }
+
+
+
+
+    function drawPolygon(annotation, options) {
+    /**
+     * Draws a polygon annotation
+     * @param annotation: the annotation to be rendered
+     * @param options: indicates whether the annotation is being hovered over in delete mode and whether the annotation is currently being drawn
+     **/
+        const [r, g, b] = getColor(annotation, options);
+        const corners = annotation.data;
+        ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", " + transparency_level + ")";
+        if (eraser_mode) {
+            ctx.strokeStyle = "rgba(1, 1, 1, 1)";
+        } else {
+            ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + ", 1.0)";
+        }      
+        if (options.current) {
+            // Shapes that are in proress are drawn as solid, and then become transparent once they are finalized
+            // The globalCompositeOperation is set to source-over to ensure that the shape is drawn on top of other shapes
+            ctx.globalCompositeOperation = "source-over";
+            drawPolygonOutline(corners);
+        } else {
+            fillPolygon(corners);
+        }
+    }
+
+
+
+
+    function drawPoints(corners, options) {
+    /**
+     * Fills the shape enclosed by a set of points
+     * @param corners: the points that enclose the shape
+     * @param options: indicates whether the annotation is being hovered over in delete mode and whether the annotation is currently being drawn
+     **/
+
+        // If drawing a single point
+        if (corners.length == 1) {
+            ctx.fillRect(
+                corners[0][0],
+                corners[0][1],
+                1,
+                1
+            );
+        
+        // If drawing a line
+        } else if (corners.length == 2) {
+            if (options.current) {
+                ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + ", " + 1 + ")";
+            } else {
+                ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + ", " + transparency_level + ")";
+            }
+            ctx.beginPath();
+            ctx.moveTo(corners[0][0], corners[0][1]);
+            ctx.lineTo(corners[1][0], corners[1][1]);
+            ctx.closePath();
+            ctx.stroke();
+        
+        // If drawing a shape with three or more points
+        } else {
+            fillPolygon(corners);
+        }
+    }
+
+
+
+
+    function drawObject(object, options) {
+    /**
+     * Function that is called to draw an object, which may include multiple component annotations
+     * Each object may include both positive and negative (erasure) marks
+     * @param object: the object to be rendered
+     * @param options: indicates whether the annotation is being hovered over in delete mode and whether the annotation is currently being drawn
+     **/
+
+        const [r, g, b] = getColor(object, options);
+        if (options.current) {
+            ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", " + 1 + ")";
+            ctx.globalCompositeOperation = "source-over";
+        } else {
+            ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", " + transparency_level + ")";
+            ctx.globalCompositeOperation = "xor";     // "source-over";
+        }
+
+        // Draw the strokes in order so that later strokes are overlaid on top of earlier strokes
+        for (let stroke of object.strokes) {
+
+            // Set the fill style, stroke style, and global composite operation based on the type of stroke
+            // Positive strokes are filled in portions of the annotation
+            if (stroke.type == "positive") {
+
+                // If the annotation is currently being worked on, fill and composite are set so that this is drawn on top
+                if (options.current) {
+                    ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", " + 1 + ")";
+                    ctx.globalCompositeOperation = "source-over";
+                
+                // If the annotation is complete, fill and composite are set so that it is transparent and overlaid on the other annotations
+                } else {
+                    ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", " + transparency_level + ")";
+                    ctx.globalCompositeOperation = "xor";     // "source-over";
+                }
+                ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + ", " + 0 + ")";
+
+            // Negative strokes are treated erasures of portions of the annotation
+            // An erasure eliminates all drawn pixels below it, including from preceding annotations, though the data is still stored for those
+            } else if (stroke.type == "negative") {
+
+                // For an erasure, fill and composite are always set to remove the drawn pixels underneath
+                ctx.fillStyle = "rgba(" + 0 + "," + 0 + "," + 0 + ", " + 1 + ")";
+                ctx.strokeStyle = "rgba(" + 0 + "," + 0 + "," + 0 + ", " + 1 + ")";
+                ctx.globalCompositeOperation = "destination-out";
+            }
+
+            // Draw the points of the stroke as a shape
+            const corners = stroke.points;
+            drawPoints(corners, options);
+        }
+    }
+
+
+
+
+    function updateGraphics() {
+    /**
+     * Updates the display of images and annotations
+     **/
+        //debugConsole.innerHTML = "entered updateGraphics()";
+
+        // Remove the prior annotations and replace with the updated annotations
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw  the completed annotations
+        annotations.forEach((ann, idx) => {
+            drawObject(ann, { current: false, idx });
+        });
+
+        // Draw an in-progress bounding box, if it exists
+        if (currentBbox.data.length != 0) {
+            drawBbox(currentBbox, { current: true });
+        }
+
+        // Draw an in-progress polygon, if it exists
+        if (currentPolygon.data.length != 0) {
+            drawPolygon(currentPolygon, { current: true });
+        }
+
+        // Draw an in-progress outline, if it exists
+        if (currentOutline.data.length != 0) {
+            drawPolygon(currentOutline, { current: true });
+        }
+
+        // Draw the initial shapes of an in-progress object that has not been finalized
+        if (currentObject.strokes.length != 0) {
+            drawObject(currentObject, { current: true });
+        }
+
+        //debugConsole.innerHTML = "finished updateGraphics()";
+    }
+
+
+
+
+    function deleteAnnotation() {
+    /**
+     * Deletes the currently selected annotation
+     **/
+        if (delete_idx > -1) {
+
+            // Log the interaction
+            let ts = new Date().getTime();
+            interaction_log.value += "-delete_annotation[" + delete_idx + "|" + ts + "]";
+
+            // Handle the delete action
+            let ann_copy = deep_copy(annotations[delete_idx]);
+            trashcan.push(ann_copy);
+            annotations.remove(delete_idx, 1);
+            document.getElementById("object_list").remove(delete_idx);
+            delete_idx = getDeleteIdx();
+            updateObjectList();
+            if (annotations.length == 0) {
+                // no more to delete, go back to standby mode
+                setAnnotationStateStandby();
+            }
+        }
+    }
+
+
+
+
+    function updateDeleteSelection() {
+    /**
+     * Updates the object list selection in delete mode when the cursor moves over a different object than was previously selected
+     **/
+        if (annotation_state == "delete") {
+            delete_idx = getDeleteIdx();
+            if (delete_idx >= 0) {
+                document.getElementById("object_list").selectedIndex = delete_idx;
+                let display_ind = delete_idx + 1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+            } else {
+                document.getElementById("object_list").selectedIndex = -1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: none";
+            }
+
+            // Update graphics so that the new selected object is displayed in black and the previously selected object is returned to its original color
+            updateGraphics();
+            previous_delete_idx = delete_idx;
+        }
+    }
+
+
+
+
+    function getDeleteIdx() {
+    /**
+     * Get the object ID to highlight in delete mode, which is the object with the smallest average distance to the pointer
+     **/
+        let deleteIdx = -1;
+        let min_dist = 1000000;
+        let dist_array = new Array();
+        for (let i = 0; i < annotations.length; i++) {
+            let ann = annotations[i];
+            let corners = [];
+            for (let stroke of ann.strokes) {
+                if (stroke.type == "positive") {
+                    corners = corners.concat(stroke.points);
+                }
+            }
+            dist_array.push(get_avg_dist(corners));
+        }
+        let dist;
+        for (let i = 0; i < dist_array.length; i++) {
+            dist = dist_array[i];
+            if (dist < min_dist) {
+                min_dist = dist;
+                deleteIdx = i;
+            }
+        }
+        return deleteIdx;
+    }
+
+
+
+
+    function updateObjectList() {
+    /**
+     * Called after delete is called to reorder the object list so that object IDs remain sequential
+     **/
+        var i, L = object_list.options.length - 1;
+        for(i = L; i >= 0; i--) {
+            object_list.remove(i);
+        }
+        if (annotations.length > 0) {
+            let a = 0;
+            while (a < annotations.length) {
+                let option = document.createElement("option");
+                let id = a + 1;
+                let ann = annotations[a];
+                let label = "Object " + id + ": " + ann.class;
+                option.innerHTML = label;
+                document.getElementById("object_list").add(option, id-1);
+                a += 1;
+            }
+        }
+    }
+
+
+
+
+    function checkIfCoordsDiffer(old_coord, new_coord) {
+    /**
+     * @return false if the two coordinates are the same or if either coord is null. Returns true otherwise.
+     * @param old_coord, @param new_coord: the two coordinates to compare, in the dict form {x: x_coord, y: y_coord }
+     **/
+        if ((old_coord == null) || (new_coord == null)) {
+            return false;
+        }
+        if (new_coord.x == old_coord.x && new_coord.y == old_coord.y) {
+            return false;
+        }
+        return true;
+    }
+
+
+
+    function resetPaintState() {
+    /**
+     * Reset the paint state variables to their initial settings
+     **/
+        paint_state = {
+            working_anchor : null,
+            working_vector : null,
+            last_point : null,
+            has_moved : false,
+            has_rotated : false
+        };
+    }
+
+
+
+
+    function addInitialPaintPoint(coord) {
+    /**
+     * Creates the first anchor point of a new paint stroke
+     * @param coord: the coordinate of the point to start the paint stroke, in the dict form {x: x_coord, y: y_coord }
+     **/
+        let start_anchor = getPaintAnchorPoint(coord.x, coord.y);
+        addShapeToCurrentObject(start_anchor);
+        paint_state.working_anchor = coord;
+    }
+
+
+
+
+    function addNewPaintSegment(coord) {
+    /**
+     * Draws a new paint segment connecting the previous anchor point to the given coordinate
+     * The paint segment consists of a new ending anchor shape, and a connector that bridges the previous anchor poing and the new ending anchor
+     * The previous anchor point is storeed in paint_state.working_anchor, which is a global variable
+     * The width of the segment is stored in brushSize, also a global variable
+     * @param coord: the coordinate of the new point to terminate the paint segment, in the dict form {x: x_coord, y: y_coord }
+     **/
+        let connector = getVectorRect(paint_state.working_anchor.x, paint_state.working_anchor.y, coord.x, coord.y, brushSize);
+        let anchor = getPaintAnchorPoint(coord.x, coord.y)
+        addShapeToCurrentObject(connector);
+        addShapeToCurrentObject(anchor);
+    }
+
+
+
+
+    function updatePaintAnchorVector(coord) {
+    /**
+     * When a paint stroke turns more than the threshold angle, establish a new anchor point and update the paint stroke state
+     * @param coord: the coordinate of the new paint annchor point, in the dict form {x: x_coord, y: y_coord }
+     **/
+        paint_state.working_anchor = coord;
+        paint_state.working_vector = null;
+        paint_state.has_rotated = false;
+    }
+
+
+
+
+    function getPaintAnchorPoint(x, y) {
+    /**
+     * Gets the shape to draw for a paint anchor point at the given coordinate
+     * @param x, @param y: X and Y coordinates of the anchor point
+     **/
+        if (brushType == "circle") {
+            return getCircleOutline(x, y, brushSize);
+        } else if (brushType == "square") {
+            return getSquareOutline(x, y, brushSize);
+        }
+    }
+
+
+
+
+    function getSquareOutline(centerX, centerY, size) {
+    /**
+     * Returns the corners of a square with the given center and side length
+     * @param centerX, @param centerY: X and Y coordinates of the center of the square
+     * @param size: side length of the square
+     **/ 
+        var pixels = new Array();
+        if (size == 1) {
+            pixels.push([centerX, centerY]);
+        } else {
+            // When the size unit is even, more mass of the square goes below and to the right of the pixel center
+            var long_side = 0;
+            var short_side = 0;
+            if (size % 2 == 0) {
+                long_side = size / 2.0;                        
+                short_side = -1 * (long_side - 1.0);
+            } else {
+                long_side = (size - 1.0) / 2.0;
+                short_side = -1 * long_side;
+            }
+            pixels.push([Math.round(centerX + short_side), Math.round(centerY + short_side)]);
+            pixels.push([Math.round(centerX + long_side), Math.round(centerY + short_side)]);
+            pixels.push([Math.round(centerX + long_side), Math.round(centerY + long_side)]);
+            pixels.push([Math.round(centerX + short_side), Math.round(centerY + long_side)]);
+        }
+        return pixels;
+    }
+
+
+
+
+    function getCircleOutline(centerX, centerY, size) {
+    /**
+     * Returns points along the outline of a circle by calling the appropriate helper function depending on the circle's diameter
+     * @param centerX, @param centerY: X and Y coordinates of the center of the circle
+     * @param size: diameter of the circle
+     **/
+        if (size <= 4) {
+            return getSmallCircleOutline(centerX, centerY, size);
+        } else if (size % 2 == 0) {
+            return getEvenCircleOutline(centerX, centerY, size);
+        } else {
+            return getOddCircleOutline(centerX, centerY, size);
+        }
+    }
+
+
+
+
+    function getSmallCircleOutline(centerX, centerY, size) {
+    /**
+     * Returns points along the outline of a circle with diameter <= 4
+     * @param centerX, @param centerY: X and Y coordinates of the center of the circle
+     * @param size: diameter of the circle
+     **/
+        var pixels = new Array();
+        if (size == 1) {
+            pixels.push([centerX, centerY]);
+        } else if (size == 2) {
+            pixels.push([centerX, centerY]);
+            pixels.push([centerX + 1, centerY]);
+            pixels.push([centerX + 1, centerY + 1]);
+            pixels.push([centerX, centerY + 1]);
+        } else if (size == 3) {
+            pixels.push([centerX - 1, centerY]);
+            pixels.push([centerX, centerY - 1]);
+            pixels.push([centerX + 1, centerY]);
+            pixels.push([centerX, centerY + 1]);
+        } else {
+            pixels.push([centerX - 1, centerY]);
+            pixels.push([centerX, centerY - 1]);
+            pixels.push([centerX + 1, centerY - 1]);
+            pixels.push([centerX + 2, centerY]);
+            pixels.push([centerX + 2, centerY + 1]);
+            pixels.push([centerX + 1, centerY + 2]);
+            pixels.push([centerX, centerY + 2]);
+            pixels.push([centerX - 1, centerY + 1]);
+        }
+        return pixels
+    }
+
+
+
+
+    function getEvenCircleOutline(centerX, centerY, size) {
+    /**
+     * Returns points along the outline of a circle with even diameter > 5
+     * @param centerX, @param centerY: X and Y coordinates of the center of the circle
+     * @param size: diameter of the circle
+     **/
+        var pixels = new Array();
+        // When the diameter is even, more mass of the circle goes below and to the right of the pixel center
+        var long_side = size / 2.0; 
+        var short_side = -1 * (long_side - 1.0); 
+        pixels.push([Math.round(centerX + short_side), Math.round(centerY)]);
+        pixels.push([Math.round(centerX + (0.7 * short_side)), Math.round(centerY + (0.7 * short_side))]);
+        pixels.push([Math.round(centerX), Math.round(centerY + short_side)]);
+        pixels.push([Math.round(centerX + (0.7 * long_side)), Math.round(centerY + (0.7 * short_side))]);
+        pixels.push([Math.round(centerX + long_side), Math.round(centerY)]);
+        pixels.push([Math.round(centerX + (0.7 * long_side)), Math.round(centerY + (0.7 * long_side))]);
+        pixels.push([Math.round(centerX), Math.round(centerY + long_side)]);
+        pixels.push([Math.round(centerX + (0.7 * short_side)), Math.round(centerY + (0.7 * long_side))]);
+        return pixels;
+    }
+
+
+
+
+    function getOddCircleOutline(centerX, centerY, size) {
+    /**
+     * Returns points along the outline of a circle with odd diameter > 4
+     * @param centerX, @param centerY: X and Y coordinates of the center of the circle
+     * @param size: diameter of the circle
+     **/ 
+        var pixels = new Array();
+        var positive_side = (size - 1.0) / 2.0;
+        var negative_side = -1 * positive_side;
+        pixels.push([Math.round(centerX + negative_side), Math.round(centerY)]);
+        pixels.push([Math.round(centerX + (0.7 * negative_side)), Math.round(centerY + (0.7 * negative_side))]);
+        pixels.push([Math.round(centerX), Math.round(centerY + negative_side)]);
+        pixels.push([Math.round(centerX + (0.7 * positive_side)), Math.round(centerY + (0.7 * negative_side))]);
+        pixels.push([Math.round(centerX + positive_side), Math.round(centerY)]);
+        pixels.push([Math.round(centerX + (0.7 * positive_side)), Math.round(centerY + (0.7 * positive_side))]);
+        pixels.push([Math.round(centerX), Math.round(centerY + positive_side)]);
+        pixels.push([Math.round(centerX + (0.7 * negative_side)), Math.round(centerY + (0.7 * positive_side))]);
+        return pixels;
+    }
+
+
+
+
+    function getVectorRect(current_x, current_y, start_x, start_y, rect_width) {
+    /**
+     * Returns a rectangle with the given width that connects the point <start_x, start_y> to the point <current_x, current_y>
+     * @returns: an array containing the four corners of the rectangle. If rect_width = 1, returns the two points of a line.
+     * @param current_x, @param current_y: the x,y coordinate where the line terminates
+     * @param start_x, @param start_y: the x,y coordinate where the line begins
+     * @param rect_width: the width of the rectangle lying along the line 
+     **/ 
+        if (rect_width == 1) {
+            return [[current_x, current_y], [start_x, start_y], ];
+        }
+        let vector_x = current_x - start_x;
+        let vector_y = current_y - start_y;
+        let magnitude = Math.sqrt((vector_x ** 2) + (vector_y ** 2))
+        let unit_normal_x = -vector_y / magnitude;
+        let unit_normal_y = vector_x / magnitude
+        rect_width = rect_width - 1;        // This is necessary when working in pixel space, otherwise the rectangle will be one pixel too wide
+        let corner1 = [Math.round(start_x + (unit_normal_x * (rect_width/2))), Math.round(start_y + (unit_normal_y * (rect_width/2)))];
+        let corner2 = [Math.round(current_x + (unit_normal_x * (rect_width/2))), Math.round(current_y + (unit_normal_y * (rect_width/2)))];
+        let corner3 = [Math.round(current_x - (unit_normal_x * (rect_width/2))), Math.round(current_y - (unit_normal_y * (rect_width/2)))];
+        let corner4 = [Math.round(start_x - (unit_normal_x * (rect_width/2))), Math.round(start_y - (unit_normal_y * (rect_width/2)))];
+        return [corner1, corner2, corner3, corner4];
+    }
+
+
+
+    function addShapeToCurrentObject(shape) {
+    /**
+     * Adds a closed shape to the currentObject data
+     * @param {array} shape: a list of points that define the shape
+     **/
+        if (eraser_mode) {
+            currentObject.strokes.push({type: "negative", points: shape});
+        } else {
+            currentObject.strokes.push({type: "positive", points: shape}); 
+        }
+    } 
+
+
+
+
+    function removeRedundantPaintSegmentData() {
+    /**
+     * If a paint stroke is continuing along the same path, parts of the paint segment will be overwritten
+     * This function removes the data from older parts of the stroke that are underneath newer parts, enabling a memory-minimizing representation
+     * Specifically, removes the last connector and ending anchor from the current object so they can be replaced by a new connector and ending anchor 
+     **/
+        currentObject.strokes.pop();      // The old ending anchor
+        currentObject.strokes.pop();      // The old connector
+        paint_state.has_rotated = false;
+    }
+
+
+
+    function updateTransform() {
+        child.style.transform = "";
+        child.style.transform +=
+            "scale(" + scaleTransform + ", " + scaleTransform + ")";
+        child.style.transform +=
+            "translate(" +
+            translateTransform[0] +
+            "px, " +
+            translateTransform[1] +
+            "px)";
+    }
+
+
+
+
+    function getCorrectCoords(evt) {
+    /**
+     * Gets the coordinates of the pointer relative to the image, taking into account the scaling and translation of the image
+     **/
+        mouseX = evt.clientX - parent.offsetLeft + parent.scrollLeft + window.pageXOffset;
+        mouseY = evt.clientY - parent.offsetTop + parent.scrollTop + window.pageYOffset;
+        correctX = (mouseX + scalingOffsetX - translateTransform_raw[0]) / newScale;
+        correctY = (mouseY + scalingOffsetY - translateTransform_raw[1]) / newScale;
+        correctX = Math.round(correctX);
+        correctY = Math.round(correctY);
+    }
+
+
+
+
+    function toggleConsentForm() {
+    /**
+     * Shows and hides the consent form
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-toggle_consent_form[" + ts + "]";
+
+        // Handle the button press
+        $("#consent_form").clearQueue();
+        $("#consent_form").slideToggle();
+    }
+
+
+
+
+    function toggleInstructions() {
+    /**
+     * Shows and hides the instructions
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-toggle_instructions[" + ts + "]";
+
+        // Handle the button press
+        $("#instruction").clearQueue();
+        $("#instruction").slideToggle();
+    }
+
+
+
+
+    function clearAnnotations() {
+        delete_idx = 0;
+        while (annotations.length > 0) {
+            deleteAnnotation();
+            delete_idx = 0;
+        }
+        annotations = new Array();
+        trashcan = new Array();
+        currentLink = { class: [], mode: "link", data: [] };
+        currentBbox = { class: [], mode: "bbox", data: [] };
+        currentPolygon = { class: [], mode: "polygon", data: [] };
+        currentOutline = { class: [], mode: "outline", data: [] };
+        currentPaint = { class: [], mode: "paint", data: [] }
+        currentObject = { class: [], modes: {"dot": false, "link": false, "bbox": false, "polygon": false, "outline": false, "paint": false}, exteriors: [], interiors: [], strokes: []};
+        currentObjectInsertId = -1;
+
+        // Update graphics to remove the annotations that have since been deleted
+        updateGraphics();
+    }
+
+
+
+
+    function undo() {
+    /**
+     * Undo the previous operation
+     * Scope of an 'operation' varies a bit: where possible, this deletes portions of an annotated shape, but in annotate mode will eliminate the entire shape for bbox and outline, as well as any closed shapes for polygon
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-undo[" + ts + "]";
+
+        // Delete state
+        if (annotation_state == "delete") {
+            // If there are deleted annotations in the trashcan, restore the most recently deleted one
+            if (trashcan.length > 0) {
+                annotations.push(trashcan.pop());
+            // If the trashcan is empty, revert to standby state
+            } else {
+                setAnnotationStateStandby();
+            }
+
+        // Annotate state
+        } else if (annotation_state == "annotate") {
+            // If there is an in-progress polygon, delete the last edge
+            if ((mode == "polygon") && (currentPolygon.data.length > 0)) {
+                currentPolygon.data.pop();
+            // If there is a closed polygon, remove it
+            } else if ((mode == "polygon") && (currentObject.strokes.length > 0)) {
+                // Add the current object stroke to the current polygon data
+                let shape_data = currentObject.strokes.pop();
+                currentPolygon.data.push(shape_data.points);
+                currentPolygon.data.pop();
+            // If there is an in-progress outline, delete the last edge
+            } else if ((mode == "outline") && (currentOutline.data.length > 0)) {
+                currentOutline.data.pop();
+            // Remove the last completed shape on the current object
+            } else if (currentObject.strokes.length > 0) {
+                currentObject.strokes.pop();
+            // If no annotations have yet been completed, get rid of the current annotation
+            } else if (annotations.length == 0) {
+                clearAnnotations();
+                setAnnotationStateStandby();
+            // If no annotations have been started, return to standby state
+            } else {
+                setAnnotationStateStandby();
+            }
+
+        // Select state
+        } else if (annotation_state == "select") {
+            // Unselect the object that was selected
+            setAnnotationStateStandby();
+
+        // Standby state
+        } else if (annotation_state == "standby") {
+            // Reopen the last completed annotation for editing, if there is one
+            if (annotations.length > 0) {
+                setAnnotationStateAnnotate(id_override = lastEditObjectId);
+            // If there are no annotations but there are deleted annotations, restore the most recently deleted one
+            } else if (trashcan.length > 0) {
+                annotations.push(trashcan.pop());
+                setAnnotationStateDelete();
+            }
+        }
+
+        // Update the graphics to reflect the changes
+        updateGraphics();
+    }
+
+
+
+
+    function reposition() {
+    /**
+     * Returns the image to its original position and scale
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-reposition[" + ts + "]";
+
+        // Handle the button press
+        child.style.transform = "";
+        scaleTransform = 1.0;
+        translateTransform = [0, 0];
+        translateTransform_raw = [0, 0];
+        newScale = 1.0;
+        oldScale = 1.0;
+        scaleRatio = 1.0;
+        scaleDiff = 0;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
+        scalingOffsetX = 0;
+        scalingOffsetY = 0;
+    }
+
+
+
+
+    function reset() {
+    /**
+     * Reverts the entire app to its starting state
+     **/
+
+        // Log the interaction
+        let ts = new Date().getTime();
+        interaction_log.value += "-reset[" + ts + "]";
+
+        // Handle the button press
+        clearAnnotations();
+        reposition();
+        firstPoint = true;
+        dragStart = false;
+        dragged = false;
+        setAnnotationStateStandby();
+    }
+
+
+
+
+    window.onload = function () {
+    /**
+     * Triggers app initialization once all content is loaded
+     **/
+        start();
+    };
+
+
+
+
+    function hotKeys(evt) {
+    /**
+     * Handles keyboard shortcuts
+     * @param evt: the keypress event
+     **/
+
+        // By default, do not record keystrokes unless it is a keystroke of interest
+        let ts = new Date().getTime();
+        let will_log = false;
+        let key_string = "";
+
+        // Press N to start a new annotation when in standby state
+        if (evt.key == "n") {
+            if (annotation_state == "standby") {
+                will_log = true;
+                setAnnotationStateAnnotate();
+            }
+        }
+
+        // Press E to toggle eraser mode when in annotation state
+        if (evt.key == "e") { 
+            if (annotation_state == "annotate") {
+                will_log = true;
+                toggleEraserMode();
+            }
+        }
+
+        // Press S to select an annotation to work on, and press again to confirm the annotation selection
+        if (evt.key == "s") {
+            if (annotation_state == "standby") {
+                will_log = true;
+                setAnnotationStateSelect();
+            } else if (annotation_state == "select") {
+                will_log = true;
+                setAnnotationStateAnnotate();
+            }
+        }
+
+        // Press D to toggle delete mode when in standby state, and press again to confirm deletion of an object
+        if (evt.key == "d") {
+            if (annotation_state == "standby") {
+                will_log = true;
+                setAnnotationStateDelete();
+            } else if (annotation_state == "delete" && delete_idx >= 0) {
+                will_log = true;
+                deleteAnnotation();
+                updateGraphics();
+            }
+        }
+
+        // Press M to cycle between modes in annotate state
+        if (evt.key == "m") {
+            if (annotation_state == "annotate" && modes.length > 1) {
+                will_log = true;
+                let currentModeNum = modes.indexOf(mode);
+                if (currentModeNum == modes.length - 1) {
+                    toggleMode(modes[0]);
+                } else {
+                    toggleMode(modes[currentModeNum + 1]);
+                }
+            }
+        }
+
+        // Press the close bracket to cycle forward through selection lists
+        if (evt.key == "]") {
+            // Cycle forward through the class options and change the currently selected option when in annotate mode
+            if (annotation_state == "annotate") {
+                will_log = true;
+                // get the selected index of the classSelection element
+                let currentClassNum = classSelection.selectedIndex;
+                if (currentClassNum == classSelection.length - 1) {
+                    classSelection.selectedIndex = 0;
+                } else {
+                    classSelection.selectedIndex = currentClassNum + 1;
+                }
+                updateAnnotationClass();
+            }
+
+            // Cycle forward through the object options and change the currently selected object when in delete mode
+            if (annotation_state == "delete") {
+                will_log = true;
+                if (delete_idx < 0) {
+                    delete_idx = getDeleteIdx();
+                }
+                if (delete_idx == annotations.length - 1) {
+                    delete_idx = 0;
+                } else {
+                    delete_idx = delete_idx + 1;
+                }
+                let display_ind = delete_idx + 1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+                object_list.selectedIndex = delete_idx;
+                updateGraphics();
+            }
+
+            // Cycle forward through the object options and change the currently selected object when in select mode
+            if (annotation_state == "select") {
+                will_log = true;
+                let select_idx = object_list.selectedIndex;
+                if (select_idx == annotations.length - 1) {
+                    select_idx = 0;
+                } else {
+                    select_idx = select_idx + 1;
+                }
+                let display_ind = select_idx + 1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+                object_list.selectedIndex = select_idx;
+            }
+        }
+
+        // Press the open bracket to cycle backward through selection lists
+        if (evt.key == "[") {
+            // Cycle backward through the class options and change the currently selected option when in annotate mode
+            if (annotation_state == "annotate") {
+                will_log = true;
+                // get the selected index of the classSelection element
+                let currentClassNum = classSelection.selectedIndex;
+                if (currentClassNum <= 0) {
+                    classSelection.selectedIndex = classSelection.options.length -1;
+                } else {
+                    classSelection.selectedIndex = currentClassNum - 1;
+                }
+                updateAnnotationClass();
+            }
+
+            // Cycle backward through the object options and change the currently selected object when in delete mode
+            if (annotation_state == "delete") {
+                will_log = true;
+                if (delete_idx < 0) {
+                    delete_idx = getDeleteIdx();
+                }
+                if (delete_idx == 0) {
+                    delete_idx = annotations.length - 1;
+                } else {
+                    delete_idx = delete_idx - 1;
+                }
+                let display_ind = delete_idx + 1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+                object_list.selectedIndex = delete_idx;
+                updateGraphics();
+            }
+
+            // Cycle backward through the object options and change the currently selected object when in select mode
+            if (annotation_state == "select") {
+                will_log = true;
+                let select_idx = object_list.selectedIndex;
+                if (select_idx == 0) {
+                    select_idx = annotations.length - 1;
+                } else {
+                    select_idx = select_idx - 1;
+                }
+                let display_ind = select_idx + 1;
+                document.getElementById("current_object_indicator").innerHTML = "Current: Object " + display_ind;
+                object_list.selectedIndex = select_idx;
+            }
+        }
+
+        // Press F to finish the current annotation when in annotate state
+        if (evt.key == "f") {
+            if (annotation_state == "annotate") {
+                will_log = true;
+                if (mode == "outline" && currentOutline.data.length > 0) {
+                    canvasPointerUpAnnotate();
+                } else if (mode == "polygon" && currentPolygon.data.length > 0) {
+                    currentPolygon.class = getClass();
+                    addShapeToCurrentObject(currentPolygon.data);
+                    currentPolygon.data = new Array();
+                } else if (mode == "bbox" && currentBbox.data.length > 0) {
+                    canvasPointerUpAnnotate();
+                } 
+                completeAnnotation(currentObject, currentObjectInsertId);
+                updateGraphics();
+                storeAnnotationResults();
+            }
+        }
+
+        // Press B to toggle between brush types when in paint mode
+        if (evt.key == "b") {
+            if (annotation_state == "annotate" && mode == "paint") {
+                will_log = true;
+                if (brushType == "square") {
+                    setBrushState("circle", true);
+                } else if (brushType == "circle") {
+                    setBrushState("square", true);
+                }
+            }
+        }
+
+        // Press C for "Close Polygon"
+        if (evt.key == "c") {
+            if (currentPolygon.data.length > 2) {
+                will_log = true;
+                currentPolygon.class = getClass();
+                addShapeToCurrentObject(currentPolygon.data);
+                updateGraphics();
+                //annotations.push(Object.assign({}, currentPolygon));
+                currentPolygon.data = new Array();
+            }
+            
+            // Store the annotation results
+            storeAnnotationResults();
+        }
+
+
+        // Press ctrl + Z for "Undo"
+        if (evt.key == "z" && evt.ctrlKey) {
+            will_log = true;
+            key_string = "ctrl_";
+            undo();
+        }
+
+        // Log the interaction
+        if (will_log) {
+            if (evt.key == "[") {
+                key_string = "list_prev";
+            } else if (evt.key == "]") {
+                key_string += "list_next";
+            } else {
+                key_string += evt.key;
+            }
+            interaction_log.value += "-key_press[" + key_string + "|" + ts + "]";
+        }
+
+        // Update the graphics to reflect the changes
+        updateGraphics();
+    }
+
+
+
+
+    let handleScroll = function (evt) {
+    /**
+     * Resizes the image when the mouse wheel is scrolled
+     **/
+        getCorrectCoords(evt);
+        delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.detail ? -evt.detail : 0;
+
+        newScale += delta / 10;
+        newScale = Math.max(newScale, 1.0);
+        newScale = Math.min(newScale, 5.0);
+        scaleRatio = newScale / oldScale;
+        scaleDiff = newScale - oldScale;
+        oldScale = scaleTransform = newScale;
+
+        scalingOffsetX = ((newScale - 1) * parent.offsetWidth) / 2;
+        scalingOffsetY = ((newScale - 1) * parent.offsetHeight) / 2;
+
+        translateTransform_raw[0] -=
+            (correctX - parent.offsetWidth / 2) * scaleDiff;
+        translateTransform_raw[1] -=
+            (correctY - parent.offsetHeight / 2) * scaleDiff;
+
+        translateTransform[0] = translateTransform_raw[0] / newScale;
+        translateTransform[1] = translateTransform_raw[1] / newScale;
+        updateTransform();
+        debugConsole.innerHTML = "finished handling scroll";
+    };
+
+
+
+
+    function getDist(pair_a, pair_b) {
+    /**
+     * Gets the distance between two pairs of numeric elements, such as two X-Y coordinates
+     * @param {array} pair_a: the first pair of numeric elements
+     * @param {array} pair_b: the second pair of numeric elements
+     **/
+        let distance = Math.sqrt(
+            Math.pow(pair_a[0] - pair_b[0], 2) + Math.pow(pair_a[1] - pair_b[1], 2)
+        );
+        return distance;
+    }
+
+
+
+
+    function deep_copy(obj) {
+    /**
+     * Creates a backup of an object (i.e., a copy that doesn't reflect future changes made to that object)
+     * @param {object} obj: the object to be copied
+     **/
+        return jQuery.extend(true, {}, obj);
+    }
+
+
+
+
+    function capitalize(string) {
+    /**
+     * Capitalizes the first character in a string
+     * @param {string} string: the string to be capitalized
+     **/
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+
+
+
+    function mean(array) {
+    /**
+     * Returns the mean of a numerical array
+     * @param {array} array: the array of numbers
+     **/
+        let total = 0;
+        for (let j = 0; j < array.length; j++) {
+            total += array[j];
+        }
+        let avg = total / array.length;
+        return avg;
+    }
+
+
+
+
+    function angleBetweenVectors(v1, v2) {
+    /**
+     * Returns the angle in radians between two vectors
+     * @param {Object} v1: the first vector with params {x} and {y}
+     * @param {Object} v2: the second vector with params {x} and {y}
+     **/
+        const dotProduct = v1.x * v2.x + v1.y * v2.y;
+        const determinant = v1.x * v2.y - v1.y * v2.x;
+        return Math.atan2(determinant, dotProduct);
+    }
+
+
+
+
+    function vectorSubtract(a, b) {
+    /**
+     * Returns the vector formed by subtracting vector b from vector a
+     * @param {Object} a: the first vector with params {x} and {y}
+     * @param {Object} b: the second vector with params {x} and {y}
+     **/
+        return { x: a.x - b.x, y: a.y - b.y };
+    }
+
+
+
+
+    function crossProduct(a, b) {
+    /**
+     * Returns the cross product of two vectors
+     * @param {Object} a: the first vector with params {x} and {y}
+     * @param {Object} b: the second vector with params {x} and {y}
+     **/
+        return a.x * b.y - a.y * b.x;
+    }
+
+
+
+
+    function dotProduct(a, b) {
+    /**
+     * Returns the dot product of two vectors
+     * @param {Object} a: the first vector with params {x} and {y}
+     * @param {Object} b: the second vector with params {x} and {y}
+     **/
+        return a.x * b.x + a.y * b.y;
+    }
+
+
+
+
+    function get_avg_dist(corners) {
+    /**
+     * Returns the average distance between a set of points and the mouse cursor in image coordinates (i.e., correctX and correctY)
+     * @param {Array} corners: an array of pairs corresponding to X and Y coordinates
+     **/ 
+        let avg_dist_array = new Array();
+        for (let j = 0; j < corners.length; j++) {
+            avg_dist_array.push(getDist([correctX, correctY], corners[j]));
+        }
+        return mean(avg_dist_array);
+    }
+
+
+
+
+    function getColor(annotation, options) {
+    /**
+     * Determines which color to rener an annotation based on its class and the current annotation state
+     * @param annotation: the annotation to be rendered
+     * @param options: indicates whether the annotation is being hovered over in delete mode
+     **/
+        if (
+            annotation_state == "delete" &&
+            "idx" in options &&
+            delete_idx === options.idx
+        ) {
+            return [0.5, 0.5, 0.5];
+        } else {
+            return className2Color(annotation.class);
+        }
+    }
+
+
+
+    function HSVtoRGB(h, s, v) {
+    /**
+     * Converts an HSV color to RGB
+     * Borrowed from https://stackoverflow.com/a/17243070/4970438
+     * @param {number} h: the hue
+     * @param {number} s: the saturation
+     * @param {number} v: the value
+     **/
+        let r, g, b, i, f, p, q, t;
+        if (arguments.length === 1) {
+            (s = h.s), (v = h.v), (h = h.h);
+        }
+        i = Math.floor(h * 6);
+        f = h * 6 - i;
+        p = v * (1 - s);
+        q = v * (1 - f * s);
+        t = v * (1 - (1 - f) * s);
+        switch (i % 6) {
+            case 0:
+                (r = v), (g = t), (b = p);
+                break;
+            case 1:
+                (r = q), (g = v), (b = p);
+                break;
+            case 2:
+                (r = p), (g = v), (b = t);
+                break;
+            case 3:
+                (r = p), (g = q), (b = v);
+                break;
+            case 4:
+                (r = t), (g = p), (b = v);
+                break;
+            case 5:
+                (r = v), (g = p), (b = q);
+                break;
+        }
+        return {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255),
+        };
+    }
+
+
+
+
+    function className2Color(className) {
+    /**
+     * Queries the class name for the corresponding HSV olor and then converts to RGB
+     * @param {string} className: the class name
+     **/
+        let color = colors[className];
+        let h = color[0];
+        let s = color[1];
+        let v = color[2];
+        let rgbColors = HSVtoRGB(h, s, v);
+        let r = rgbColors.r.toString();
+        let g = rgbColors.g.toString();
+        let b = rgbColors.b.toString();
+        return [r, g, b];
+    }
+    
+</script>

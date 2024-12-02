@@ -1,0 +1,448 @@
+<link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous"
+/>
+<link
+  crossorigin="anonymous"
+  href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+  rel="stylesheet"
+/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<style>
+  #parent {
+    width: 1000px;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+    background: #f5f5f5;
+  }
+
+  #child {
+    margin: auto;
+  }
+
+  #myCanvas {
+    position: absolute;
+  }
+
+  #pic {
+    width: 100%;
+    height: auto;
+  }
+
+  #text {
+    width: 1000px;
+  }
+
+  .btn:hover {
+    text-shadow: 0px 0px 1px black;
+  }
+
+  .fixed_width {
+    width: 130px !important;
+  }
+
+  .selected{
+    border:5px solid black;
+  }
+
+  #text {
+    margin-bottom: 20px;
+  }
+
+  #buttons {
+    margin-top: 10px;
+  }
+
+  .radio-grid {
+    display: grid;
+    grid-template-columns: 3, 1fr;
+    grid-gap: 0px;
+  }
+
+  .radiobtn{
+    margin-right:5px;
+    margin-left:5px;
+    border: 0px;
+    width: 50%;
+    height: 1em;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .cell {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+/* Hide the default radio button */
+input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Style the custom rectangular button */
+.radio-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-right: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Apply selected style */
+input[type="radio"]:checked + .radio-button {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Style the label */
+.cell label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+#container {
+    display: flex;              /* establish flex container */
+    flex-direction: column;     /* stack flex items vertically */
+    justify-content: center;    /* center items vertically, in this case */
+    align-items: center;        /* center items horizontally, in this case */
+    height: 300px;
+    border: 1px solid black;
+}
+
+.box {
+    width: 300px;
+    margin: 5px;
+    text-align: center;
+}
+
+</style>
+
+<div>
+    <div id="consent_form" style="width: 1000px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+        <h1>Research study consent form</h1><br>
+        You are invited to participate in a research study called <strong>“Towards a Computer Vision Annotation Error Framework.”</strong><br>
+        <br>
+        The purpose of this study is to assess different techniques for producing image segmentation annotations. 
+        Image segmentation is a method for identifying objects in an image where all of an object's pixels are labeled. 
+        Image segmentation produces higher resolution labels than are obtained in other object detection tasks, such as bounding boxes. 
+        The goal of this study is to assess different methods of producing image segmentation annotations to determine which methods produce the highest quality data.<br>
+        <br>
+        During the study session, you will provide segmentation annotations on a set of images using the user interface provided to you. 
+        You will be told which objects to mark in each image. You may complete as many or as few images as you'd like. 
+        Most images can be completed in under two minutes. 
+        If you leave the session, you can return later to complete more images.<br>
+        <br>
+        The risks of this study are minimal and are anticipated to be no greater than what you would be exposed to in your everyday life.<br>
+        <br>
+        You will be offered compensation of 6 cents per image, or 2 cents per annotated object, depending on which tasks you complete.
+        Payment will be sent directly through Mechanical Turk.
+        To ensure that participants complete the work being paid for, all annotations will be evaluated for accuracy. 
+        Annotations that vary by more than 10% of correct pixels may be denied compensation. 
+        This evaluation will be completed within 7 days of when you submit your annotations, at which time payment will be released.<br>
+        <br>
+        Prior to completing this task, you must complete the English vocabulary quiz at the bottom of this page.
+        You must receive a score of at least 80% on the vocabulary quiz to be eligible for the study.<br>
+        <br>
+        Participation is voluntary. 
+        You do not have to be in this study, and if you do join, you can stop or leave at any time. 
+        In either case there are no penalties and you will be compensated for all images that you complete up to the point you withdraw from the study.<br>
+        <br>
+        There is no direct benefit to you for participating in this study.<br>
+        <br>
+        The research team is not collecting any personal information from you other than your Mechanical Turk worker ID. 
+        This identifier will not be included in any public disclosure of study data.<br>
+        <br>
+        This study is based upon work supported by the United States Department of Defense. 
+        Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Department of Defense.<br>
+        <br>
+        We will limit access to your Amazon Mechanical Turk worker ID to people who have a need to review this information. We cannot promise complete privacy. 
+        The Duke University Institutional Review Board and other representatives of Duke may see your information. 
+        Complete study records shall be maintained for each human research study and shall be made available for review by the Department of Defense. 
+        De-identified, aggregate data may be published online after the conclusion of the study.<br>
+        <br>
+        All documents containing your Amazon Mechanical Turk worker ID will be kept securely for three years and then destroyed.<br>
+        <br>
+        If you have any questions, concerns, or complaints, or think that the research has hurt you, you can talk to the research team by contacting Ben Bauchwitz at <strong>benjamin.bauchwitz@duke.edu</strong>. 
+        This research has been reviewed and approved by the Duke University Campus Institutional Review Board. 
+        You can reach them at campusIRB@duke.edu if you would prefer to speak with someone not associated with the study or have questions about your rights as a research subject. 
+        If contacting the IRB, please reference protocol ID# <strong>2023-0399</strong>.<br>
+        <br>
+        By clicking <strong>submit</strong> at the bottom of this page, you express your consent to participate in this study.
+    </div>
+
+    <div id="quiz_header" style="width: 1500px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+        <h1>English vocabulary quiz</h1><br>
+        This quiz is intended to assess your familiarity with the American English name of 12 common objects.<br>
+        The quiz has two parts.
+    </div>
+
+    <div id="part1_header" style="width: 1500px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+        <h2>Part 1: Match the word to the image</h2>
+        For each image, select the object name that best matches it.
+    </div>
+
+    <div id="image_quiz" class="container" style="width: 1500px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+
+    </div>
+
+    <div id="part2_header" style="width: 1000px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+        <h2>Part 2: Match the word to the definition</h2>
+        For each definition, select the object name that best matches it.
+    </div>
+
+    <div id="definition_quiz" class="container" style="width: 1500px; align-items: left; margin-left: 20px; margin-bottom: 50px;">
+
+    </div>
+
+</div>
+
+<div>
+  <input id="result_data" name="result_data" type="hidden" />
+</div>
+
+<div>
+  <label id="debug_console" style="outline: 1px solid black; width: 1000px;">
+
+  </label>
+</div>
+
+<script id="quals" type="text/javascript">
+
+    // The object classes to be tested (in the future can be made data driven)
+    const classOptions = [
+        "Airplane",
+        "Backpack",
+        "Bicycle",
+        "Boat",
+        "Bus",
+        "Car",
+        "Cat",
+        "Dog",
+        "Motorcycle",
+        "Person",
+        "Train",
+        "Truck"
+    ];
+
+    // The images associated with each object class above (in the future can be made data driven)
+    const classImages = [
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Airplane.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Backpack.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Bicycle.jpg",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Boat.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Bus.jpeg",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Car.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Cat.jpeg",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Dog.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Motorcycle.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Person.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Train.png",
+        "https://duke-hal-vocab-quiz.s3.amazonaws.com/Truck.png"
+    ];
+
+    // The english definition for each object class above (in the future can be data driven)
+    const classDefinitions = [
+        "a powered heavier-than-air aircraft with fixed wings that generate lift",
+        "a pack that usually has two shoulder straps and is carried on the back",
+        "a vehicle with two in-line wheels with handlebars for steering that is driven by rotating pedals",
+        "a small vessel for travel on water",
+        "a large motor vehicle for carrying passengers by road, usually along a fixed route according to a schedule",
+        "a small four-wheel automotive vehicle designed for passenger transportation",
+        "a mammal related to lions and tigers, domesticated as a pet and for catching rats and mice",
+        "a domestic mammal closely related to the gray wolf",
+        "a motor vehicle with two in-line wheels",
+        "a human individual",
+        "a connected line of railroad cars with or without a locomotive",
+        "a motorized, wheeled vehicle for moving heavy articles"
+    ];
+
+    let correctAnswers = {}
+    let chosenAnswers = {}
+
+    // Generate the quiz items so that we are not hardcoding tons of duplicate HTML above
+    var start = function () {
+        buildQuiz("image", false);
+        buildQuiz("definition", false);
+        document.getElementById("result_data").value = getResultString();
+    }
+
+    // Called when the page is first loaded
+    window.onload = function () {
+        start();
+    };
+
+    // Generates the HTML and javascript for each quiz, matching a set of prompts to a set of object names
+    function buildQuiz(type, fixed) {
+        var sequence = getRandomSequence(fixed);
+        for (var i = 0; i < sequence.length; i++) {
+            var parentId = type + "_quiz";
+            var quiz = document.getElementById(parentId);
+            var index = sequence[i];
+            var quizItem = createQuizNode(index, type);
+            quiz.appendChild(quizItem);
+            var br = document.createElement("br");
+            quiz.appendChild(br);
+
+            // Update the answer key and result data
+            var key = quizItem.name;
+            correctAnswers[key] = classOptions[index];
+            chosenAnswers[key] = "NA";
+        }
+    }
+
+    // Generates an individual quiz item consisting of one prompt and one class select dropdown
+    // Currently supported prompt types: images or definitions
+    function createQuizNode(index, type) {
+        var divName = type + "_quiz_" + index;
+        var newDiv = document.createElement("div");
+        newDiv.name = divName;
+        newDiv.id = divName;
+        newDiv.class = "box";
+        newDiv.style.marginBottom = "20px";
+        newDiv.style.marginRight = "100px";
+        var hr = document.createElement("hr");
+        newDiv.appendChild(hr);
+        if (type == "image") {
+            var img = createImageItem(index);
+            newDiv.appendChild(img);
+        } else if (type == "definition") {
+            var def = createDefinitionItem(index);
+            newDiv.appendChild(def);
+        }
+        var options = createClassOptionDropdown(index, type);
+        options.addEventListener("change", function(event) {
+          chosenAnswers[divName] = event.target.value;
+          //document.getElementById("debug_console").innerHTML = getResultString();
+          document.getElementById("result_data").value = getResultString();
+        });
+        newDiv.appendChild(options);
+        var br = document.createElement("br");
+        newDiv.appendChild(br);
+        return newDiv;
+    }
+
+    // Retrieves an image and formats it for placement in the image quiz
+    function createImageItem(index) {
+        var img = document.createElement('img');
+        img.src = classImages[index];
+        img.width = 300;
+        img.style.display = "inline-block";
+        img.style.marginRight = "100px";
+        img.style.verticalAlign = "top";
+        return img;
+    }
+
+    // Retrieves a definition and formats it for placement in the definition quiz
+    function createDefinitionItem(index) {
+        var def = classDefinitions[index];
+        var divName = "definition_" + index;
+        var text = document.createElement(divName);
+        text.innerText = "Definition: " + def;
+        text.width = 300;
+        text.style.maxWidth = 300;
+        text.style.minWidth = 300;
+        text.style.wordWrap = "pre-wrap";
+        text.style.float = "left";
+        text.style.marginRight = "100px";
+        text.style.verticalAlign = "top";
+        return text;
+    }
+
+    // Creates a class select dropdown that can be used for recording answers for any quiz
+    function createClassOptionDropdown(correctIndex, quizName) {
+        // Name should be of the form "image_quiz_input_item_4"
+        var name = quizName + "_quiz_input_item_" + correctIndex;
+        var selectList = document.createElement("select");
+        selectList.id = name;
+        selectList.name = name;
+        selectList.size = classOptions.length;
+        if (quizName == "image") {
+            selectList.style.display = "inline-block";
+        }
+        for (var i = 0; i < classOptions.length; i++) {
+            var option = document.createElement("option");
+            option.value = classOptions[i];
+            option.text = classOptions[i];
+            selectList.appendChild(option);
+        }
+        return selectList;
+    }
+
+    // Converts the student's recorded answers to csv format
+    // Uses alternate delimeters: '-' within lines and '|' between lines
+    function getResultString() {
+      var header = "Item-CorrectResponse-ChosenResponse-IsCorrect|";
+      //var lines = [];
+      //lines.push(header);
+      var lines = "";
+      lines = lines + header;
+      let correctCount = 0;
+      for (const key in correctAnswers) {
+        let correctAnswer = correctAnswers[key];
+        let chosenAnswer = chosenAnswers[key];
+        let isCorrect = correctAnswer == chosenAnswer;
+        if (isCorrect) {
+          correctCount += 1;
+        }
+        let line = key + "-" + correctAnswer + "-" + chosenAnswer + "-" + isCorrect + "|";
+        //lines.push(line);
+        lines = lines + line;
+      }
+      var total = 2 * classOptions.length;
+      var score = Math.round(correctCount/total * 10000) / 100
+      var summary = "Total-" + total + "-" + correctCount + "-" + score;
+      //lines.push(summary)
+      lines = lines + summary;
+      return lines;
+    }
+
+    // Returns a random sequence for ordering quiz elements, or the default ordering
+    function getRandomSequence(fixed) {
+        if (fixed==true) {
+            return [9, 6, 0, 4, 12, 13, 3, 2, 7, 11, 8, 5, 1, 10, 14];
+        } else {
+            var sequence = [];
+            for (var i = 0; i < classOptions.length; i++) {
+                sequence.push(i);
+            }
+            return shuffle(sequence);
+        }
+    }
+
+    // Takes an array and randomly shuffles the elements
+    function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex != 0) {
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
+    }
+
+</script>
