@@ -1,0 +1,26 @@
+# optimizer
+optimizer = dict(type='***OPTIMIZER_TYPE***', lr=***START_LR***, momentum=***MOMENTUM***, weight_decay=***WEIGHT_DECAY***)            
+optim_wrapper = dict(type='OptimWrapper', optimizer=optimizer, clip_grad=None)
+# learning policy
+param_scheduler = [
+    dict(type='LinearLR', start_factor=***WARMUP_START_FACTOR***, begin=***WARMUP_BEGIN_ITERS***, end=***WARMUP_END_ITERS***, by_epoch=False),
+    dict(
+        type='PolyLR',
+        eta_min=***POLY_LR_ETA_MIN***,
+        power=***POLY_LR_POWER***,
+        begin=***POLY_LR_BEGIN_ITERS***,
+        end=***POLY_LR_END_ITERS***,
+        by_epoch=False)
+]
+# training schedule
+train_cfg = dict(
+    type='IterBasedTrainLoop', max_iters=***ITERS***, val_interval=***VAL_INTERVAL***)
+val_cfg = dict(type='ValLoop')
+test_cfg = dict(type='TestLoop')
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=***LOG_INTERVAL***, log_metric_by_epoch=False),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', by_epoch=False, interval=***CHECKPOINT_INTERVAL***),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    visualization=dict(type='SegVisualizationHook'))

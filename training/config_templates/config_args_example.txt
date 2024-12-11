@@ -1,0 +1,6 @@
+exp_name=exp2
+train_ann_file=ImageSets/exp2/exp2_ncar_mixed_0p99iou_1p0rate_train.txt
+val_ann_file=ImageSets/exp2/ground_truth_original_val.txt
+iters=160000
+poly_lr_end_iters=120000
+resume=True

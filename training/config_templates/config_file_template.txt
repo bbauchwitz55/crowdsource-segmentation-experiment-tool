@@ -1,0 +1,19 @@
+_base_ = [
+    ***MODEL_ARCH_CONFIG_PATH***,
+    ***DATASET_CONFIG_PATH***,
+    ***RUNTIME_CONFIG_PATH***,
+    ***SCHEDULE_CONFIG_PATH***
+]
+
+work_dir = ***WORK_DIR_PATH***
+
+***MODEL_SETTING_TEXT***
+
+# Override logging parameters
+log_config = dict(
+    interval=100,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        dict(type='TensorboardLoggerHook')
+    ]
+)
